@@ -15,4 +15,6 @@ kernel_entry.o : kernel_entry.asm
 	nasm kernel_entry.asm -f elf -o kernel_entry.o
 
 os-image: kernel.o kernel_entry.o booting.bin kernel.bin
+	rm kernel.o kernel_entry.o
 	cd ../out && cat ../src/booting.bin ../src/kernel.bin > os-image
+	
