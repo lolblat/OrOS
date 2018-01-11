@@ -10,8 +10,8 @@ start:
 	mov sp,0x9000
 	mov bp, sp
 	mov bx, HELLO_16_BIT
-	call print_string
 
+	call print_string
 	mov ah,0
 	mov al,3
 	int 0x10; change screen mode to print in protected mode
@@ -28,11 +28,12 @@ loop_real_mode:
 [bits 16]
 load_kernel:
 	mov bx, KERNEL_OFFSET
-	mov dh,15
+	mov dh, 15
 	mov dl, [BOOT_DRIVE]
 	call load_real_mode
 	ret
 	leave
+
 %include "print/print_real_mode.asm"
 %include "switch_to_protected.asm"
 %include "gdt.asm"
@@ -49,6 +50,8 @@ protected_mode:
 	mov ebx, HELLO_32_BIT
 	call print_string_32_bit	
 	call KERNEL_OFFSET
+
+
 protected_mode_loop:
 	jmp protected_mode_loop
 
