@@ -4,8 +4,11 @@
 extern "C"
 {
     void kernel_main();
+    #include "../drivers/screen.h"
 }
+
 void kernel_main()
 {
-   *((char *) 0xb8000) = 'X';
+    terminal_clear();
+    terminal_write_string("From the kernel");
 }
