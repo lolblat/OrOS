@@ -7,7 +7,7 @@ unsigned int strlen(const char * c); //TODO: when implementing libc, move that f
 void terminal_clear() {
     for (int y = 0; y < SCREEN_HEIGHT; y++) {
         for (int x = 0; x < SCREEN_WIDTH; x++) {
-            *(unsigned short *) ((unsigned short*)VGA_ADDRESS + y * SCREEN_HEIGHT + x) = GetVGACode(' ');
+            *(unsigned short *) ((unsigned short*)VGA_ADDRESS + y * SCREEN_WIDTH + x) = GetVGACode(' ');
         }
     }
     index_x = 0;
@@ -16,8 +16,15 @@ void terminal_clear() {
 
 void terminal_write_char(const char c)
 {
+    if(c == '\n')
+    {
+        index_y++;
+        index_x = 0;
+        return;
+    }
+
     unsigned short code = GetVGACode(c);
-    *((unsigned  short*)VGA_ADDRESS + index_y * SCREEN_HEIGHT + index_x) = code;
+    *((unsigned  short*)VGA_ADDRESS + index_y * SCREEN_WIDTH + index_x) = code;
     index_x++;
     if(index_x == SCREEN_WIDTH)
     {
