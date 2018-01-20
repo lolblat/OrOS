@@ -3,8 +3,8 @@
 //
 
 #include "idt.h"
-
-void set_idt_gate(int n, u32 handler)
+using namespace CPU;
+void IDT::set_idt_gate(int n, u32 handler)
 {
     entries[n].offset_1 = (handler) & (0xFFFF);
     entries[n].selector = KERNEL_CS;
@@ -13,7 +13,7 @@ void set_idt_gate(int n, u32 handler)
     entries[n].offset_2 = ((handler & 0xFFFF0000) >> 16);
 }
 
-void set_idt()
+void IDT::set_idt()
 {
     pointer.base = (u32)&entries;
     pointer.limit = sizeof(idt_entry) * IDT_ENTRIES - 1;

@@ -11,8 +11,9 @@ extern "C"
 
 void kernel_main()
 {
-    terminal_clear();
-    isr_install();
+    drivers::Screen s;
+    s.terminal_clear();
+    CPU::ISR isr;
     __asm__("int $2");
     __asm__("int $3");
     __asm__("int $4");

@@ -2,9 +2,15 @@
 // Created by lolblat on 12/01/18.
 //
 #include "screen.h"
+using namespace drivers;
+Screen::vga_colors  Screen::default_fore_color = white;
+Screen::vga_colors  Screen::default_back_color = black;
+unsigned int Screen::index_x = 0;
+unsigned int Screen::index_y = 0;
+
 unsigned int strlen(const char * c); //TODO: when implementing libc, move that function.
 
-void terminal_clear() {
+void Screen::terminal_clear() {
     for (int y = 0; y < SCREEN_HEIGHT; y++) {
         for (int x = 0; x < SCREEN_WIDTH; x++) {
             *(unsigned short *) ((unsigned short*)VGA_ADDRESS + y * SCREEN_WIDTH + x) = GetVGACode(' ');
@@ -14,7 +20,7 @@ void terminal_clear() {
     index_y = 0;
 }
 
-void terminal_write_char(const char c)
+void Screen::terminal_write_char(const char c)
 {
     if(c == '\n')
     {
@@ -38,13 +44,13 @@ void terminal_write_char(const char c)
 
 }
 
-void terminal_change_colors(vga_colors arg_fore_color, vga_colors arg_back_color)
+void Screen::terminal_change_colors(vga_colors arg_fore_color, vga_colors arg_back_color)
 {
     default_fore_color = arg_fore_color;
     default_back_color = arg_back_color;
 }
 
-void terminal_write_string(const char* str)
+void Screen::terminal_write_string(const char* str)
 {
     for(unsigned int i = 0; i < strlen(str); i++)
     {
