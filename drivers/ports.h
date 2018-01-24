@@ -11,13 +11,13 @@ extern "C"
         class Ports
         {
         public:
-            unsigned char port_byte_in(unsigned short port);
+            static unsigned char port_byte_in(unsigned short port);
 
-            void port_byte_out(unsigned short port, unsigned char data);
+            static void port_byte_out(unsigned short port, unsigned char data);
 
-            unsigned short port_word_in(unsigned short port);
+            static unsigned short port_word_in(unsigned short port);
 
-            void port_word_out(unsigned short port, unsigned short data);
+            static void port_word_out(unsigned short port, unsigned short data);
         };
     }
 };

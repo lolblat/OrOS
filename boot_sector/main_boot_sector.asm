@@ -49,7 +49,7 @@ protected_mode:
 	mov esp,9000h
 	mov ebx, HELLO_32_BIT
 	call print_string_32_bit	
-	call KERNEL_OFFSET
+	call KERNEL_OFFSET ; call kernel process.
 
 
 protected_mode_loop:

@@ -5,8 +5,31 @@
 #ifndef OROS_ISR_H
 #define OROS_ISR_H
 
+//some defines about the pic ports.
 #include "types.h"
 #include "idt.h"
+#include "../drivers/ports.h"
+#define PIC1 0x20
+#define PIC2 0xA0
+#define PIC1_COMMAND PIC1
+#define PIC1_DATA (PIC1 + 1)
+#define PIC2_COMMAND PIC2
+#define PIC2_DATA (PIC2 + 1)
+
+
+
+#define ICW1_ICW4	0x01		/* ICW4 (not) needed */
+#define ICW1_SINGLE	0x02		/* Single (cascade) mode */
+#define ICW1_INTERVAL4	0x04		/* Call address interval 4 (8) */
+#define ICW1_LEVEL	0x08		/* Level triggered (edge) mode */
+#define ICW1_INIT	0x10		/* Initialization - required! */
+
+#define ICW4_8086	0x01		/* 8086/88 (MCS-80/85) mode */
+#define ICW4_AUTO	0x02		/* Auto (normal) EOI */
+#define ICW4_BUF_SLAVE	0x08		/* Buffered mode/slave */
+#define ICW4_BUF_MASTER	0x0C		/* Buffered mode/master */
+#define ICW4_SFNM	0x10		/* Special fully nested (not) */
+
 //Extern 32 hardware ints.
 extern "C" void isr0();
 extern "C" void isr1();
@@ -42,21 +65,61 @@ extern "C" void isr30();
 extern "C" void isr31();
 
 
+//extern the irq functions
+extern "C" void irq1();
+extern "C" void irq2();
+extern "C" void irq3();
+extern "C" void irq4();
+extern "C" void irq5();
+extern "C" void irq6();
+extern "C" void irq7();
+extern "C" void irq8();
+extern "C" void irq9();
+extern "C" void irq10();
+extern "C" void irq11();
+extern "C" void irq12();
+extern "C" void irq13();
+extern "C" void irq14();
+extern "C" void irq15();
+
 //need to push all reg's before doing the int handle.
 extern "C"
 {
-    namespace CPU {
-        struct interrupt_frame {
-            u32 ds;
-            u32 edi, esi, ebp, esp, ebx, edx, ecx, eax;
-            u32 interrupt_number, err_code;
-            u32 eip, cs, eflags, useresp, ss;
-        };
 
-        class ISR {
+    namespace CPU
+    {
+
+        class ISR
+        {
+        private:
+            void SetPIC()
+            {
+                unsigned char c1,c2;
+                c1 = drivers::Ports::port_byte_in(PIC1_DATA);
+                c2 = drivers::Ports::port_byte_in(PIC2_DATA);
+
+                drivers::Ports::port_byte_out(PIC1_COMMAND, ICW1_INIT + ICW1_ICW4); //INIT
+                drivers::Ports::port_byte_out(PIC2_COMMAND, ICW1_INIT + ICW1_ICW4);
+
+                drivers::Ports::port_byte_out(PIC1_DATA, 0x20); // master pic vector offset.
+                drivers::Ports::port_byte_out(PIC2_DATA, 0x28); // slave pic vector offset.
+
+                drivers::Ports::port_byte_out(PIC1_DATA,4); // tell master pic that there is a slave at IRQ2
+                drivers::Ports::port_byte_out(PIC2_DATA,2);//tell slave pic its cascade identity
+
+                drivers::Ports::port_byte_out(PIC1_DATA,ICW4_8086);
+                drivers::Ports::port_byte_out(PIC2_DATA,ICW4_8086);
+
+                drivers::Ports::port_byte_out(PIC1_DATA, c1); //restore mask
+                drivers::Ports::port_byte_out(PIC2_DATA, c2);
+
+            }
         public:
             ISR() {
                 IDT idt;
+                //create gates for all those functions.
+                SetPIC();
+                // set idt gates
                 idt.set_idt_gate(0, (u32) isr0);
                 idt.set_idt_gate(1, (u32) isr1);
                 idt.set_idt_gate(2, (u32) isr2);
@@ -89,10 +152,43 @@ extern "C"
                 idt.set_idt_gate(29, (u32) isr29);
                 idt.set_idt_gate(30, (u32) isr30);
                 idt.set_idt_gate(31, (u32) isr31);
+
+                //set irq
+                idt.set_idt_gate(32,(u32)irq1);
+                idt.set_idt_gate(33,(u32)irq2);
+                idt.set_idt_gate(34,(u32)irq3);
+                idt.set_idt_gate(35,(u32)irq4);
+                idt.set_idt_gate(36,(u32)irq5);
+                idt.set_idt_gate(37,(u32)irq6);
+                idt.set_idt_gate(38,(u32)irq7);
+                idt.set_idt_gate(39,(u32)irq8);
+                idt.set_idt_gate(40,(u32)irq9);
+                idt.set_idt_gate(41,(u32)irq10);
+                idt.set_idt_gate(42,(u32)irq11);
+                idt.set_idt_gate(43,(u32)irq12);
+                idt.set_idt_gate(44,(u32)irq13);
+                idt.set_idt_gate(45,(u32)irq14);
+                idt.set_idt_gate(46,(u32)irq15);
+
+                //finally set the idt in the cpu.
                 idt.set_idt();
             }
         };
     }
-    void isr_handler(CPU::interrupt_frame frame);
+
+    struct interrupt_frame
+    {
+        u32 ds;
+        u32 edi, esi, ebp, esp, ebx, edx, ecx, eax;
+        u32 interrupt_number, err_code;
+        u32 eip, cs, eflags, useresp, ss;
+    };
+
+    void isr_handler(interrupt_frame frame);
+    void irq_handler(interrupt_frame frame);
+    typedef void (*isr_t)(interrupt_frame);
+
+
+
 }
 #endif //OROS_ISR_H

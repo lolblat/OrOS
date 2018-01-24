@@ -13,8 +13,12 @@ void kernel_main()
 {
     drivers::Screen s;
     s.terminal_clear();
+
+    // initialize the isr and the idt for interrupts.
     CPU::ISR isr;
-    __asm__("int $2");
+
+    //dummy interrupts
+    __asm__("int $41");
     __asm__("int $3");
     __asm__("int $4");
 }

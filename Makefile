@@ -29,3 +29,8 @@ kernel.bin: kernel/kernel_entry_start.s ${ASM_OBJ_FILE} $(OBJ) kernel/kernel.cpp
 %.o: %.asm
 	nasm $< -f elf -o $@
 	# Cant use extern in bin files, and becuase of that change to elf file format.
+
+remove_all:
+	cd kernel && rm *.o *.bin
+	cd drivers && rm *.o
+	cd cpu && rm *.o
