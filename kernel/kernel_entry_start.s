@@ -11,8 +11,7 @@
 .section .text
     start:
         mov $stack_top, %esp
+        # call the kernel.
         call kernel_main
         hang:
-            cli
-            hlt
             jmp hang

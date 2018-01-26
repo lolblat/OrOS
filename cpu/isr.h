@@ -30,6 +30,25 @@
 #define ICW4_BUF_MASTER	0x0C		/* Buffered mode/master */
 #define ICW4_SFNM	0x10		/* Special fully nested (not) */
 
+
+#define IRQ0 32
+#define IRQ1 33
+#define IRQ2 34
+#define IRQ3 35
+#define IRQ4 36
+#define IRQ5 37
+#define IRQ6 38
+#define IRQ7 39
+#define IRQ8 40
+#define IRQ9 41
+#define IRQ10 42
+#define IRQ11 43
+#define IRQ12 44
+#define IRQ13 45
+#define IRQ14 46
+#define IRQ15 47
+
+
 //Extern 32 hardware ints.
 extern "C" void isr0();
 extern "C" void isr1();
@@ -66,6 +85,7 @@ extern "C" void isr31();
 
 
 //extern the irq functions
+extern "C" void irq0();
 extern "C" void irq1();
 extern "C" void irq2();
 extern "C" void irq3();
@@ -154,21 +174,22 @@ extern "C"
                 idt.set_idt_gate(31, (u32) isr31);
 
                 //set irq
-                idt.set_idt_gate(32,(u32)irq1);
-                idt.set_idt_gate(33,(u32)irq2);
-                idt.set_idt_gate(34,(u32)irq3);
-                idt.set_idt_gate(35,(u32)irq4);
-                idt.set_idt_gate(36,(u32)irq5);
-                idt.set_idt_gate(37,(u32)irq6);
-                idt.set_idt_gate(38,(u32)irq7);
-                idt.set_idt_gate(39,(u32)irq8);
-                idt.set_idt_gate(40,(u32)irq9);
-                idt.set_idt_gate(41,(u32)irq10);
-                idt.set_idt_gate(42,(u32)irq11);
-                idt.set_idt_gate(43,(u32)irq12);
-                idt.set_idt_gate(44,(u32)irq13);
-                idt.set_idt_gate(45,(u32)irq14);
-                idt.set_idt_gate(46,(u32)irq15);
+                idt.set_idt_gate(IRQ0,(u32)irq0);
+                idt.set_idt_gate(IRQ1,(u32)irq1);
+                idt.set_idt_gate(IRQ2,(u32)irq2);
+                idt.set_idt_gate(IRQ3,(u32)irq3);
+                idt.set_idt_gate(IRQ4,(u32)irq4);
+                idt.set_idt_gate(IRQ5,(u32)irq5);
+                idt.set_idt_gate(IRQ6,(u32)irq6);
+                idt.set_idt_gate(IRQ7,(u32)irq7);
+                idt.set_idt_gate(IRQ8,(u32)irq8);
+                idt.set_idt_gate(IRQ9,(u32)irq9);
+                idt.set_idt_gate(IRQ10,(u32)irq10);
+                idt.set_idt_gate(IRQ11,(u32)irq11);
+                idt.set_idt_gate(IRQ12,(u32)irq12);
+                idt.set_idt_gate(IRQ13,(u32)irq13);
+                idt.set_idt_gate(IRQ14,(u32)irq14);
+                idt.set_idt_gate(IRQ15,(u32)irq15);
 
                 //finally set the idt in the cpu.
                 idt.set_idt();
@@ -189,6 +210,6 @@ extern "C"
     typedef void (*isr_t)(interrupt_frame);
 
 
-
+    void register_interrupt_handler(u8, isr_t);
 }
 #endif //OROS_ISR_H
