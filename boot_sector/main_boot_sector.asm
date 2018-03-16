@@ -1,6 +1,7 @@
 [org 0x7c00]
 [bits 16]
 KERNEL_OFFSET equ 0x1000
+
 start:
 	mov [BOOT_DRIVE],dl
 	; start with printing in 16 bit cpu mode
@@ -16,19 +17,23 @@ start:
 	mov al,3
 	int 0x10; change screen mode to print in protected mode
 
-
 	;load kernel section
 	call load_kernel
-	
+    call load_memory_map
 	call switch_to_protected
 loop_real_mode:
 	jmp loop_real_mode
 
-
+[bits 16]
+%include "DetectMemory.asm"
+load_memory_map:
+    call memory_map
+    ret
+    leave
 [bits 16]
 load_kernel:
 	mov bx, KERNEL_OFFSET
-	mov dh, 15
+	mov dh, 31 ; welll need to make that big, rly big, like rly rly big. huge
 	mov dl, [BOOT_DRIVE]
 	call load_real_mode
 	ret
@@ -39,6 +44,7 @@ load_kernel:
 %include "gdt.asm"
 %include "print/print_protected_mode.asm"
 %include "load_real_mode.asm"
+
 [bits 32]
 protected_mode:
 	mov ax, 0x10
@@ -48,7 +54,7 @@ protected_mode:
 	mov fs,ax
 	mov esp,9000h
 	mov ebx, HELLO_32_BIT
-	call print_string_32_bit	
+	call print_string_32_bit
 	call KERNEL_OFFSET ; call kernel process.
 
 

@@ -3,8 +3,8 @@ BOOT_DIR := boot
 CC := i686-elf-g++
 LD := i686-elf-ld
 CPPFLAGS := -ffreestanding -g
-CPP_SOURCES = $(wildcard drivers/*.cpp cpu/*.cpp)
-CPP_HEADERS = $(wildcard drivers/*.h cpu/*.h)
+CPP_SOURCES = $(wildcard drivers/*.cpp cpu/*.cpp Util/*.cpp)
+CPP_HEADERS = $(wildcard drivers/*.h cpu/*.h Util/*.h)
 ASM_FILES = $(wildcard cpu/*.asm)
 OBJ = ${CPP_SOURCES:.cpp=.o}
 ASM_OBJ_FILE = ${ASM_FILES:.asm=.o}
