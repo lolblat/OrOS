@@ -10,33 +10,39 @@
 
 ;the call to int, will change ebx, when ebx will be equal zero, it's mean that the list of free memory is over.
 ;so we wont reset ebx every call, we need to change ecx = 24, eax = e820 and inc di
-
+;this will save the base address(u64) length(u64) and type(u32)
+;types: 1 - free 2 - reversed 3 -acpi reclaimable memory
 [bits 16]
 memory_map:
     .start equ 0x0600
     .end equ 0x5000
-    .count equ 0x0596
+    .count equ 0x0596 ; count is the number of rows in the table.
+
     xor ebx,ebx
-    mov edx,.start
-    mov es,edx
-    mov di, 0
-    mov esi, 0
+    xor edx,edx
+    mov es,edx ;e820 will insert data to es:di
+    mov edx,0x534D4150 ; magic number
+
+    mov di, .start
+    xor esi,esi
     call .lpcall
     ret
     leave
 
 .lpcall:
     inc esi
-    mov edx,0x534D4150
-    mov eax,0xe820
+    mov eax,0xE820
     mov ecx,24
     int 0x15
+    jc .over
+
     test ebx,ebx
     jz .over
+
     add di, 24
     jmp .lpcall
 
 .over:
-    mov [.count], si
+    mov  [.count], esi
     ret
     leave

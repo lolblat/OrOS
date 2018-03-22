@@ -30,6 +30,7 @@ load_memory_map:
     call memory_map
     ret
     leave
+
 [bits 16]
 load_kernel:
 	mov bx, KERNEL_OFFSET
