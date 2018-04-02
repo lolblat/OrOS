@@ -14,11 +14,19 @@ extern "C"
     namespace CPU
     {
 
+        enum MemoryType
+        {
+            USABLE_RAM = 1,
+            RESERVED = 2,
+            ACPI_RECLAIMABLE = 3,
+            ACPI_NVS = 4,
+            BAD = 5
+        };
         struct MemoryEntry
         {
             long_long base_address;
             long_long length_of_chunk;
-            u32 type;
+            MemoryType type;
             u32 aspc;
 
             void operator=(const MemoryEntry &a)
@@ -38,6 +46,7 @@ extern "C"
             public:
                 MemoryDetector();
                 void Debug();
+                MemoryEntry* FindBestEntry();
         };
     }
 };

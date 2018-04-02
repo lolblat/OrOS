@@ -187,8 +187,3 @@ void Util::printf(const char *str, ...)
     va_end(args);
 }
 
-
-void PrintLongLong(long_long long_parm)
-{
-
-}

@@ -1,3 +1,4 @@
 floppya: 1_44="os-image", status = inserted
 boot: floppy
 memory: guest=512, host = 256
+display_library: x, options="gui_debug"

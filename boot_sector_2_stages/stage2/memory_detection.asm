@@ -14,20 +14,23 @@
 ;types: 1 - free 2 - reversed 3 -acpi reclaimable memory
 [bits 16]
 memory_map:
-    .start equ 0x0600
+    .start equ 0x0500
     .end equ 0x5000
-    .count equ 0x0596 ; count is the number of rows in the table.
 
     xor ebx,ebx
     xor edx,edx
-    mov es,edx ;e820 will insert data to es:di
+    push es
+
+    mov es,edx ;e820 will insert the data to es:di
     mov edx,0x534D4150 ; magic number
 
     mov di, .start
     xor esi,esi
     call .lpcall
+
+    pop es
     ret
-    leave
+
 
 .lpcall:
     inc esi
@@ -43,6 +46,6 @@ memory_map:
     jmp .lpcall
 
 .over:
-    mov  [.count], esi
+    mov ebx, .start
+    mov ecx, esi
     ret
-    leave

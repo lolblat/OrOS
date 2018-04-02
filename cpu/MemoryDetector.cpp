@@ -18,7 +18,6 @@ CPU::MemoryDetector::MemoryDetector()
         m_entries[i].base_address = tmp.base_address;
         m_entries[i].length_of_chunk = tmp.length_of_chunk;
         m_entries[i].type = tmp.type;
-        Util::printf("RAW: %d, %d, %d\n", m_entries[i].base_address.top, m_entries[i].length_of_chunk.top,m_entries[i].type);
     }
 }
 
@@ -32,4 +31,17 @@ void CPU::MemoryDetector::Debug()
         Util::printf("%x|%x|  %d\n",m_entries[i].base_address.top,m_entries[i].length_of_chunk.top,m_entries[i].type);
     }
 
+}
+
+CPU::MemoryEntry* CPU::MemoryDetector::FindBestEntry()
+{
+    MemoryEntry* ptr = 0x00;
+    for(u32 i = 0; i < m_sum_of_entries; i++)
+    {
+        if(m_entries[i].type == USABLE_RAM && m_entries[i].base_address.top > 0x9F000) // some kernel address, like rly basic address for kernel and such, need to decide to map the kernel or not and than use that
+        {
+            ptr = &(m_entries[i]);
+        }
+    }
+    return ptr;
 }
