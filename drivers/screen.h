@@ -4,7 +4,7 @@
 
 #ifndef OROS_SCREEN_H
 #define OROS_SCREEN_H
-#define VGA_ADDRESS 0xB8000 //address of vga buffer
+#define VGA_ADDRESS 0xC00B8000 //address of vga buffer
 #define SCREEN_WIDTH 80
 #define SCREEN_HEIGHT 25
 

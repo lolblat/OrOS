@@ -8,6 +8,7 @@
 #include "types.h"
 #include "../Util/Util.h"
 #include "../drivers/screen.h"
+
 #define MAX_ENTRIES_IN_TABLE 15
 extern "C"
 {
@@ -44,7 +45,7 @@ extern "C"
                 u32 m_sum_of_entries;
                 MemoryEntry m_entries[15];
             public:
-                MemoryDetector();
+                MemoryDetector(BootingInfo& info);
                 void Debug();
                 MemoryEntry* FindBestEntry();
         };

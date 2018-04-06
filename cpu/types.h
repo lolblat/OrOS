@@ -19,4 +19,9 @@ struct long_long
         bottom = a.bottom;
     }
 };
+struct BootingInfo
+{
+    u32 ptr_to_memory_map;
+    u32 count_of_memory_entries;
+};
 #endif //OROS_TYPES_H

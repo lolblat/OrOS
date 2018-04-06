@@ -68,6 +68,8 @@ booting_info:
 
 STAGE_2_WELCOME db "[D] Welcome to stage 2 of the boot :)",0
 KERNEL_ADDR: equ 0x100000
+
+
 %include "stage2/unreal_mod.asm"
 %include "stage2/memory_detection.asm"
 %include "stage2/protected_mod.asm"

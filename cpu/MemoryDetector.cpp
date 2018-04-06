@@ -3,18 +3,17 @@
 //
 
 #include "MemoryDetector.h"
-CPU::MemoryDetector::MemoryDetector()
+CPU::MemoryDetector::MemoryDetector(BootingInfo& info)
 {
     u64 sum_of_entries = 0;
-    Util::memread((void*)0x0596,(void*)&sum_of_entries,sizeof(u32),1);
+    sum_of_entries = info.count_of_memory_entries;
     m_sum_of_entries = sum_of_entries;
-    MemoryEntry t;
-    Util::printf("There are: %d entries Tmp size: %d \n", m_sum_of_entries, sizeof(t));
-
+    Util::printf("There are: %d entries \n", m_sum_of_entries);
+    char* memory_map_base_address = ((char*)info.ptr_to_memory_map + 0xC0000000);
     for(u32 i = 0; i < sum_of_entries && i < 15; i++)
     {
         MemoryEntry tmp;
-        Util::memread((void*)((char*)0x0600 + i * sizeof(MemoryEntry)), &tmp, sizeof(MemoryEntry),1); // + acsp padding
+        Util::memread((void*)(memory_map_base_address + i * sizeof(MemoryEntry)), &tmp, sizeof(MemoryEntry),1); // + acsp padding
         m_entries[i].base_address = tmp.base_address;
         m_entries[i].length_of_chunk = tmp.length_of_chunk;
         m_entries[i].type = tmp.type;
