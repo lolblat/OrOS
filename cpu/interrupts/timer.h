@@ -5,10 +5,10 @@
 #ifndef OROS_TIMER_H
 #define OROS_TIMER_H
 
-#include "../drivers/ports.h"
-#include "../drivers/screen.h"
+#include "../../drivers/ports.h"
+#include "../../drivers/screen.h"
 #include "isr.h"
-#include "types.h"
+#include "../types.h"
 
 #define PIC_TIMER_FREQ 1193180
 #define COMMAND_REGISTER 0x43

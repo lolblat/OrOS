@@ -47,7 +47,7 @@ extern "C"
             public:
                 MemoryDetector(BootingInfo& info);
                 void Debug();
-                MemoryEntry* FindBestEntry();
+                MemoryEntry* FindSuitableEntry();
         };
     }
 };

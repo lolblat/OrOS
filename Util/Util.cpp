@@ -152,27 +152,23 @@ void Util::printf(const char *str, ...)
         if(*str == '%')
         {
             set = true;
-        } else if (set)
-        {
+        } else if (set) {
             /* why no switch bro */
-            if(*str == 'd')
-            {
-                u32 num = va_arg(args,u32);
+            if (*str == 'd') {
+                u32 num = va_arg(args, u32);
                 char str[number_size_u32(num) + 1];
-                to_string((u64)num,str);
+                to_string((u64) num, str);
                 s.terminal_write_string(str);
-            }
-            else if (*str == 'x')
-            {
-                u32 num = va_arg(args,u32);
+            } else if (*str == 'x') {
+                u32 num = va_arg(args, u32);
                 char str[18];
                 str[17] = 0;
-                to_hex(num,str);
+                to_hex(num, str);
                 s.terminal_write_string(str);
-            } else if(*str == 'l')
+            } else if (*str == 's')
             {
-                long_long num = va_arg(args,long_long);
-
+                char* st = va_arg(args,char*);
+                s.terminal_write_string(st);
             }
 
             set = false;

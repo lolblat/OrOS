@@ -58,6 +58,8 @@ load_kernel_to_memory: ; 0x7e24 on bochs
 protected_mode:
 
     ;call load_kernel
+    mov eax, KERNEL_ADDR
+    add eax, kernel_start
     mov ebx, booting_info
     call KERNEL_ADDR
     hlt

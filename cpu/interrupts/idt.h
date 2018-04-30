@@ -5,7 +5,7 @@
 #ifndef OROS_IDT_H
 #define OROS_IDT_H
 
-#include "types.h"
+#include "../types.h"
 #define  KERNEL_CS  0x08
 #define IDT_ENTRIES 256
 extern "C"

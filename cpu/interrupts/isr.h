@@ -6,9 +6,9 @@
 #define OROS_ISR_H
 
 //some defines about the pic ports.
-#include "types.h"
+#include "../types.h"
 #include "idt.h"
-#include "../drivers/ports.h"
+#include "../../drivers/ports.h"
 #define PIC1 0x20
 #define PIC2 0xA0
 #define PIC1_COMMAND PIC1

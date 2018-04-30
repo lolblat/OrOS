@@ -4,9 +4,9 @@ BOOT_DIR := boot
 CC := i686-elf-g++
 LD := i686-elf-ld
 CPPFLAGS := -Wall -ffreestanding -g -fno-exceptions
-CPP_SOURCES = $(wildcard drivers/*.cpp cpu/*.cpp Util/*.cpp)
-CPP_HEADERS = $(wildcard drivers/*.h cpu/*.h Util/*.h)
-ASM_FILES = $(wildcard cpu/*.asm )
+CPP_SOURCES = $(wildcard drivers/*.cpp cpu/*.cpp Util/*.cpp cpu/interrupts/*.cpp MemoryAllocation/*.cpp)
+CPP_HEADERS = $(wildcard drivers/*.h cpu/*.h Util/*.h cpu/interrupts/*.h MemoryAllocation/*.h)
+ASM_FILES = $(wildcard cpu/interrupts/*.asm )
 OBJ = ${CPP_SOURCES:.cpp=.o}
 ASM_OBJ_FILE = ${ASM_FILES:.asm=.o}
 

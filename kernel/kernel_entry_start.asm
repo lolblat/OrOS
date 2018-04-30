@@ -11,6 +11,12 @@ align 0x1000
 BootPageDir:
     times 1024 dd 0x2 ;not present, read write and kernel only
 
+;%assign i 0
+;%rep 769
+;TableEntry_%+i:
+ ;   times 1024 dd 0x3
+;%assign i i + 1
+;%endrep
 TableEntry_0: ; for the first mb
     times 1024 dd 0x3
 
@@ -81,18 +87,23 @@ _loader:
     jmp ecx
 
 
-
+extern kernel_virtual_end;
+extern kernel_physical_end;
 
 HighHalfBitch:
     pop ebx
     pop edx
-    mov dword [BootPageDir], 0
+ ;   mov dword [BootPageDir], 0
     invlpg[0]
 
 
     mov esp,0xC0090000 + STACK_SIZE
     mov ebp,esp
+
+    push dword kernel_virtual_end
+    push dword kernel_physical_end
     push ebx
+
     call kernel_main
     hlt
 

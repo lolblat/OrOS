@@ -8,7 +8,7 @@ CPU::MemoryDetector::MemoryDetector(BootingInfo& info)
     u64 sum_of_entries = 0;
     sum_of_entries = info.count_of_memory_entries;
     m_sum_of_entries = sum_of_entries;
-    Util::printf("There are: %d entries \n", m_sum_of_entries);
+    Util::printf("There are: %d entries in the memory map\n", m_sum_of_entries);
     char* memory_map_base_address = ((char*)info.ptr_to_memory_map + 0xC0000000);
     for(u32 i = 0; i < sum_of_entries && i < 15; i++)
     {
@@ -32,7 +32,7 @@ void CPU::MemoryDetector::Debug()
 
 }
 
-CPU::MemoryEntry* CPU::MemoryDetector::FindBestEntry()
+CPU::MemoryEntry* CPU::MemoryDetector::FindSuitableEntry()
 {
     MemoryEntry* ptr = 0x00;
     for(u32 i = 0; i < m_sum_of_entries; i++)

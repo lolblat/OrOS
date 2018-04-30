@@ -3,7 +3,7 @@
 //
 
 #include "isr.h"
-#include "../drivers/screen.h"
+#include "../../drivers/screen.h"
 using namespace CPU;
 
 
