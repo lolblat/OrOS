@@ -22,19 +22,17 @@ Paging::Paging()
 
 }
 
-void Paging::Init(u32 free_memory_start_address, u32 free_memory_end_address) // allocate the pages on the free memory
+u32 Paging::Init(u32 free_memory_start_address, u32 free_memory_end_address) // allocate the pages on the free memory
 {
-    Util::printf("Start: %x\n", free_memory_start_address);
+
     if(0x10000 - (free_memory_start_address&0xFFFF) != 0) // align the address
     {
         free_memory_start_address += 0x10000 - (free_memory_start_address & 0xFFFF);
     }
-
-
     m_page_table_index = free_memory_start_address >> 22;
 
     bool alloc_new_table = true;
-    Util::printf("End: %d\n", m_page_frame_index);
+
     m_page_frame_index = free_memory_start_address >> 12 & 0x3FF;
     u32 ptr_to_free_memory_for_storage = free_memory_start_address;
 
@@ -61,12 +59,10 @@ void Paging::Init(u32 free_memory_start_address, u32 free_memory_end_address) //
 
 
         *page_dir_table_index = (((u32)page_frames - 0xC0000000)| PAGE_TABLE_OPTION);
-        Util::printf("[DEBUG] %x\n",page_frames);
-
         m_page_table_index++;
         free_memory_start_address += 1024 * 4096;
         ptr_to_free_memory_for_storage += 1024 * 4;
 
     }
-    
+    return ptr_to_free_memory_for_storage;
 }

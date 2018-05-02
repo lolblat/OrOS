@@ -32,9 +32,11 @@ void kernel_main(BootingInfo& info, u32 physical_end, u32 virtual_end)
     dec.Debug();
     Util::printf("End of Kernel physic: %x\n",physical_end);
     CPU::MemoryEntry *bestE = dec.FindSuitableEntry();
-    //BitMapAllocator alloc = BitMapAllocator(bestE->base_address.top, bestE->length_of_chunk.top + bestE->base_address.top);
-    p.Init(physical_end,bestE->length_of_chunk.top + (bestE->base_address.top -physical_end));
 
+    u32 free_memory = p.Init(physical_end,bestE->length_of_chunk.top + bestE->base_address.top );
+
+    BitMapAllocator alloc = BitMapAllocator(free_memory, bestE->length_of_chunk.top + bestE->base_address.top);
+    Util::printf("[D] %x %x %x %x\n",alloc.AllocatePage(),alloc.AllocatePage(),alloc.AllocatePage(),alloc.AllocatePage());
      // initialize the isr and the idt for interrupts.
 
     CPU::ISR isr;

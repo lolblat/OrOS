@@ -19,7 +19,7 @@ private:
     u32  m_page_frame_index;
 public:
     Paging();
-    void Init(u32 start,u32 end);
+    u32 Init(u32 start,u32 end);
 
 };
 #endif //OROS_PAGING_H

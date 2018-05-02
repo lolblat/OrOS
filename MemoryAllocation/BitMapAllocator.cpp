@@ -5,7 +5,10 @@
 
 BitMapAllocator::BitMapAllocator(u32 start, u32 end)
 {
-
+    if(0x10000 - (start&0xFFFF) != 0)
+    {
+        start += 0x10000 - (start & 0xFFFF);
+    }
     m_start_addr = start;
     m_end_addr = end;
     m_next_free_bit.bit = 0;
@@ -23,31 +26,35 @@ PageType BitMapAllocator::GetTypeOfPage(u32 page)
 {
     u32 index = page / 8;
     u32 bit = page % 8;
-    PageType t = (PageType )(((m_bit_map[index] << bit) & 0x80000000) >> 7);
+    PageType t = (PageType )(((m_bit_map[index] << bit) & 0x80) >> 7);
     return t;
 }
 
 
 /*
- * Alloc a page and return his physical address, [TODO: need to allocate on the page table!!!!]
+ * Alloc a page and return his physical address
  */
 u32 BitMapAllocator::AllocatePage()
 {
     u8 bit = 0x1 << m_next_free_bit.bit;
-    m_bit_map[m_next_free_bit.index] |= bit;// set as allocated
+    m_bit_map[m_next_free_bit.index] = m_bit_map[m_next_free_bit.index] | bit;// set as allocated
+
     u32 index_holder = m_next_free_bit.index;
     u32 bit_holder = m_next_free_bit.bit;
+
     for(u32 i = 0; i < 16318; i++)
     {
         bool free = false;
         u8 k = 0;
         for(k = 0; k < 8; k++)
         {
-            if((PageType)((m_bit_map[i] << k) & 0x80000000) == 0) // free page
+            if((PageType)(m_bit_map[i] & (0x1 << k)) == 0) // free page
             {
                 free = true;
+                break;
             }
         }
+
         if(free)
         {
             m_next_free_bit.index = i;
@@ -60,9 +67,6 @@ u32 BitMapAllocator::AllocatePage()
     bit_holder = (bit_holder * 4096); // each bit is 4096
 
     u32 physical_page_address = (u32)(m_start_addr + index_holder + bit_holder);
-    u32 page_table_index = physical_page_address >> 22;
-    u32 page_frame_index = (physical_page_address >> 12) & 0x3FF;
-
     return physical_page_address;
 
 }
