@@ -3,11 +3,18 @@
 //
 #include "BitMapAllocator.h"
 
-BitMapAllocator::BitMapAllocator(u32 start, u32 end)
+BitMapAllocator::BitMapAllocator()
 {
-    if(0x10000 - (start&0xFFFF) != 0)
+
+    m_start_addr = (u32*)0;
+    m_end_addr = (u32*)0;
+}
+
+void BitMapAllocator::Init(u32 *start, u32 *end)
+{
+    if(0x10000 - ((u32)start&0xFFFF) != 0)
     {
-        start += 0x10000 - (start & 0xFFFF);
+        start = (u32*)((u8*)start + 0x10000 - ((u32)start & 0xFFFF));
     }
     m_start_addr = start;
     m_end_addr = end;
@@ -34,7 +41,7 @@ PageType BitMapAllocator::GetTypeOfPage(u32 page)
 /*
  * Alloc a page and return his physical address
  */
-u32 BitMapAllocator::AllocatePage()
+u32 *BitMapAllocator::AllocatePage()
 {
     u8 bit = 0x1 << m_next_free_bit.bit;
     m_bit_map[m_next_free_bit.index] = m_bit_map[m_next_free_bit.index] | bit;// set as allocated
@@ -66,7 +73,7 @@ u32 BitMapAllocator::AllocatePage()
     index_holder = (index_holder * 4096 * 8); // each index in the bit map table is equal to 8 pages
     bit_holder = (bit_holder * 4096); // each bit is 4096
 
-    u32 physical_page_address = (u32)(m_start_addr + index_holder + bit_holder);
+    u32* physical_page_address = (u32*)(m_start_addr + index_holder + bit_holder);
     return physical_page_address;
 
 }
@@ -74,11 +81,14 @@ u32 BitMapAllocator::AllocatePage()
 /*
  * Free the given page, change the ptr to look at the page
  */
-void BitMapAllocator::Free(u32 page) {
-    u32 index = page / 8;
-    u8 bit = page % 8;
-    m_bit_map[index] = (m_bit_map[index] ^ (0x1
-            << bit)); // zero bit map bit, if bit is 1 so 1 ^ 1 = 0 --> free , if page free 0 ^ 0 = 0 --> free to
+void BitMapAllocator::Free(u32 *page_phy_addr) {
+    u32 *physical_min = ((u32*)(u32)page_phy_addr - (u32)m_start_addr);
+
+    u32 index_page = (u32)physical_min  / 4096;
+    u32 index = index_page / 8;
+    u32 bit = index_page % 8;
+
+    m_bit_map[index] = (m_bit_map[index] ^ (0x1 << bit)); // zero bit map bit, if bit is 1 so 1 ^ 1 = 0 --> free , if page free 0 ^ 0 = 0 --> free to
     m_next_free_bit.index = index;
     m_next_free_bit.bit = bit;
 }

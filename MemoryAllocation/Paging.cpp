@@ -31,7 +31,7 @@ u32 Paging::Init(u32 free_memory_start_address, u32 free_memory_end_address) // 
     }
     m_page_table_index = free_memory_start_address >> 22;
 
-    bool alloc_new_table = true;
+
 
     m_page_frame_index = free_memory_start_address >> 12 & 0x3FF;
     u32 ptr_to_free_memory_for_storage = free_memory_start_address;

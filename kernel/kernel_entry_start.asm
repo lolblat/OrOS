@@ -93,15 +93,14 @@ extern kernel_physical_end;
 HighHalfBitch:
     pop ebx
     pop edx
- ;   mov dword [BootPageDir], 0
     invlpg[0]
 
 
     mov esp,0xC0090000 + STACK_SIZE
     mov ebp,esp
 
-    push dword kernel_virtual_end
-    push dword kernel_physical_end
+    push kernel_virtual_end
+    push kernel_physical_end
     push ebx
 
     call kernel_main
