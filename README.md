@@ -1,4 +1,13 @@
 # OrOS
-This OS is for studing purpose *only*
-please dont use it, this OS is really dumb.
-Orr
+# OS for studing purpose only
+
+OS written in c++.
+
+Check list:
+  * 2 stage boot sector.
+  * Paging
+  * Memory manager(kmalloc, free)
+  * File system
+  * Processes
+  
+
