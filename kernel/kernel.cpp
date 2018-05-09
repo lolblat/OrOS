@@ -38,7 +38,6 @@ void kernel_main(BootingInfo& info, u32 physical_end, u32 virtual_end)
 
 
      // initialize the isr and the idt for interrupts.
-
     CPU::ISR isr;
     __asm__("sti");
 
