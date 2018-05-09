@@ -4,10 +4,10 @@
 OS written in c++.
 
 Check list:
-  * 2 stage boot sector.
-  * Paging
-  * Memory manager(kmalloc, free)
-  * File system
-  * Processes
+  * 2 stage boot sector - Check
+  * Paging - Check
+  * Memory manager(kmalloc, free) - Check
+  * File system - Need to implement
+  * Processes - Need to implement
   
 
