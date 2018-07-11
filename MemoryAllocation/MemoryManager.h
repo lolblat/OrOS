@@ -27,11 +27,14 @@ extern "C"
             u32 *m_last_free_address;
             u32 m_page_addr;
             BitMapAllocator m_allocator;
+            static MemoryManager* m_instance;
         public:
             MemoryManager(u32 *start_addr, u32 *end_addr);
             void *kmalloc(u32 size);
             void free(u32 *addr);
+            static MemoryManager* GetInstance();
 
     };
+
 };
 #endif //OROS_MEMORYMANAGER_H

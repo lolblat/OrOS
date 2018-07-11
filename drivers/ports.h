@@ -4,20 +4,26 @@
 
 #ifndef OROS_PORTS_H
 #define OROS_PORTS_H
+#include "../cpu/types.h"
 extern "C"
 {
+
     namespace drivers
     {
         class Ports
         {
+        private:
+            u32 m_port_number;
         public:
-            static unsigned char port_byte_in(unsigned short port);
+            Ports(u32 port_number);
+            Ports();
+            u8 port_byte_in();
+            void port_byte_out(u8 data);
 
-            static void port_byte_out(unsigned short port, unsigned char data);
+            u16 port_word_in();
+            void port_word_out(u16 data);
 
-            static unsigned short port_word_in(unsigned short port);
-
-            static void port_word_out(unsigned short port, unsigned short data);
+            void SetPort(u32 port_number);
         };
     }
 };

@@ -3,26 +3,38 @@
 //
 #include "ports.h"
 using namespace drivers;
-unsigned char Ports::port_byte_in(unsigned short port)
+Ports::Ports(u32 port_number)
 {
-    unsigned char res;
-    __asm__("in %%dx, %%al" : "=a" (res) : "d" (port));
+    this->m_port_number = port_number;
+}
+Ports::Ports()
+{
+    m_port_number = 0;
+}
+u8 Ports::port_byte_in()
+{
+    u8 res;
+    __asm__("in %%dx, %%al" : "=a" (res) : "d" (m_port_number));
     return res;
 }
 
-void Ports::port_byte_out(unsigned short port, unsigned char data)
+void Ports::port_byte_out(u8 data)
 {
-    __asm__("out %%al, %%dx" : : "a" (data),  "d" (port));
+    __asm__("out %%al, %%dx" : : "a" (data),  "d" (m_port_number));
 }
 
-unsigned short Ports::port_word_in(unsigned short port)
+u16 Ports::port_word_in()
 {
-    unsigned short res;
-    __asm__("in %%dx, %%ax": "=a" (res) : "d" (port));
+    u16 res;
+    __asm__("in %%dx, %%ax": "=a" (res) : "d" (m_port_number));
     return res;
 }
 
-void Ports::port_word_out(unsigned short port, unsigned short data)
+void Ports::port_word_out(u16 data)
 {
-    __asm__("out %%ax,%%dx" : : "a" (data), "d" (port));
+    __asm__("out %%ax,%%dx" : : "a" (data), "d" (m_port_number));
+}
+void Ports::SetPort(u32 port_number)
+{
+    m_port_number = port_number;
 }

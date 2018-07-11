@@ -114,28 +114,32 @@ extern "C"
         private:
             void SetPIC()
             {
-                unsigned char c1,c2;
-                c1 = drivers::Ports::port_byte_in(PIC1_DATA);
-                c2 = drivers::Ports::port_byte_in(PIC2_DATA);
+                u8 c1,c2;
+                drivers::Ports pic1(PIC1_DATA),pic2(PIC2_DATA),pic1_command(PIC1_COMMAND),pic2_command(PIC2_COMMAND);
 
-                drivers::Ports::port_byte_out(PIC1_COMMAND, ICW1_INIT + ICW1_ICW4); //INIT
-                drivers::Ports::port_byte_out(PIC2_COMMAND, ICW1_INIT + ICW1_ICW4);
+                c1 = pic1.port_byte_in();
+                c2 = pic2.port_byte_in();
 
-                drivers::Ports::port_byte_out(PIC1_DATA, 0x20); // master pic vector offset.
-                drivers::Ports::port_byte_out(PIC2_DATA, 0x28); // slave pic vector offset.
 
-                drivers::Ports::port_byte_out(PIC1_DATA,4); // tell master pic that there is a slave at IRQ2
-                drivers::Ports::port_byte_out(PIC2_DATA,2);//tell slave pic its cascade identity
+                pic1_command.port_byte_out(ICW1_INIT + ICW1_ICW4);
+                pic2_command.port_byte_out(ICW1_INIT + ICW1_ICW4);
 
-                drivers::Ports::port_byte_out(PIC1_DATA,ICW4_8086);
-                drivers::Ports::port_byte_out(PIC2_DATA,ICW4_8086);
+                pic1.port_byte_out(0x20);
+                pic2.port_byte_out(0x28);
 
-                drivers::Ports::port_byte_out(PIC1_DATA, c1); //restore mask
-                drivers::Ports::port_byte_out(PIC2_DATA, c2);
+                pic1.port_byte_out(4);
+                pic2.port_byte_out(2);
 
+                pic1.port_byte_out(ICW4_8086);
+                pic2.port_byte_out(ICW4_8086);
+
+                pic1.port_byte_out(c1);
+                pic2.port_byte_out(c2);
             }
+            static ISR* m_instance;
         public:
             ISR() {
+                m_instance = this;
                 IDT idt;
                 //create gates for all those functions.
                 SetPIC();
@@ -194,6 +198,7 @@ extern "C"
                 //finally set the idt in the cpu.
                 idt.set_idt();
             }
+            static ISR* GetInstance();
         };
     }
 

@@ -5,7 +5,7 @@
 #include "isr.h"
 #include "../../drivers/screen.h"
 using namespace CPU;
-
+ISR* ISR::m_instance = (ISR*)0;
 
 isr_t interrupts_handler[256]; // all interrupts.
 
@@ -25,9 +25,11 @@ void irq_handler(interrupt_frame frame)
     //send EOI to the pic
     if(int_num >= 32 /*irq first interrupt*/ + 8/*for slave*/)
     {
-        drivers::Ports::port_byte_out(0xA0,0x20);
+        drivers::Ports p(0xA0);
+        p.port_byte_out(0x20);
     }
-    drivers::Ports::port_byte_out(0x20,0x20);
+    drivers::Ports p(0x20);
+    p.port_byte_out(0x20);
 
     //start interrupt handler
     if(interrupts_handler[int_num] != 0)
@@ -43,4 +45,9 @@ void register_interrupt_handler(u8 offset, isr_t handler)
 {
     //set interrupt handler at offset.
     interrupts_handler[offset] = handler;
+}
+
+ISR* ISR::GetInstance()
+{
+    return m_instance;
 }

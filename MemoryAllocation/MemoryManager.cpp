@@ -3,6 +3,7 @@
 //
 
 #include "MemoryManager.h"
+MemoryManager* MemoryManager::m_instance = (MemoryManager*)0;
 MemoryManager::MemoryManager(u32 *start_addr, u32 *end_addr)
 {
     m_start = start_addr;
@@ -11,14 +12,10 @@ MemoryManager::MemoryManager(u32 *start_addr, u32 *end_addr)
 
     m_page_addr = (u32)m_allocator.AllocatePage(); // last page allocate
 
-   // for(u32* i = m_start; i < m_end; i += 4) // zero the heap
-   // {
-     //       *i  = 0x0;
-    //}
-
 
     m_last_free_address = (u32*)m_page_addr;
     *m_last_free_address = PAGE_SIZE;
+    m_instance = this;
 }
 
 void* MemoryManager::kmalloc(u32 size)
@@ -43,4 +40,9 @@ void* MemoryManager::kmalloc(u32 size)
     m_last_free_address = (u32*)((u32)m_last_free_address + size + 12+ 4);
 
     return ret;
+}
+
+MemoryManager* MemoryManager::GetInstance()
+{
+    return m_instance;
 }

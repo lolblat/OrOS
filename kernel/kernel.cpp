@@ -15,7 +15,7 @@ extern "C"
     #include "../MemoryAllocation/BitMapAllocator.h"
     #include "../MemoryAllocation/Paging.h"
     #include "../MemoryAllocation/MemoryManager.h"
-
+#include "../drivers/ATA.h"
     void kernel_main(BootingInfo&,u32,u32);
 }
 
@@ -26,6 +26,8 @@ void kernel_main(BootingInfo& info, u32 physical_end, u32 virtual_end)
     CPU::MemoryEntry *bestE = dec.FindSuitableEntry();
     u32 ptr_to_free_memory = p.Init(physical_end,bestE->length_of_chunk.top + bestE->base_address.top );
     MemoryManager m = MemoryManager((u32*)ptr_to_free_memory, (u32*)(bestE->base_address.top + bestE->length_of_chunk.top - ptr_to_free_memory));
+    CPU::ISR isr;
+    __asm__("sti");
 
     drivers::Screen s;
 
@@ -34,12 +36,15 @@ void kernel_main(BootingInfo& info, u32 physical_end, u32 virtual_end)
     s.terminal_write_string("Initialize kernel with 2 stage boot sector... Success!\n");
     Util::printf("End of Kernel physic: %x\n",physical_end);
     Util::printf("Setting up paging and heap... Success!\n",physical_end);
+    ATA ata(Primary,Master);
+    ata.ATAIdentify();
+    char *data = ata.ATARead(0,3);
+    Util::printf("[D] data: %x",*(u16*)((u8*) data + 1080));
     //detection of memory test
 
 
      // initialize the isr and the idt for interrupts.
-    CPU::ISR isr;
-    __asm__("sti");
+
 
     CPU::Timer timer;
     //we want freq of 50.

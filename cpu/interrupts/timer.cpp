@@ -23,9 +23,9 @@ void Timer::initialize_timer(unsigned int freq)
     u8 high = (u8)((divisor >> 8) & 0xFF); // find high byte
 
     //set the PIT to get new rate generator with some freq.
-    drivers::Ports::port_byte_out(COMMAND_REGISTER, CHANNEL_ZERO_OR_KEY | ACCESS_MODE_L_AND_H_OR_KEY | OPERATING_MODE_RATE_GENERATOR);
-
+    drivers::Ports command(COMMAND_REGISTER),channel_zero(CHANNEL_ZERO);
+    command.port_byte_out(CHANNEL_ZERO_OR_KEY | ACCESS_MODE_L_AND_H_OR_KEY | OPERATING_MODE_RATE_GENERATOR);
     // pass freq, first low byte then high byte
-    drivers::Ports::port_byte_out(CHANNEL_ZERO, low);
-    drivers::Ports::port_byte_out(CHANNEL_ZERO, high);
+    channel_zero.port_byte_out(low);
+    channel_zero.port_byte_out(high);
 }
