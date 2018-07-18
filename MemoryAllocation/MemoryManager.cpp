@@ -10,11 +10,16 @@ MemoryManager::MemoryManager(u32 *start_addr, u32 *end_addr)
     m_end = end_addr;
     m_allocator.Init(start_addr, end_addr);
 
+    for(u32 i = 0; i < 9; i++)
+    {
+        m_allocator.AllocatePage();
+    }
+
     m_page_addr = (u32)m_allocator.AllocatePage(); // last page allocate
 
 
     m_last_free_address = (u32*)m_page_addr;
-    *m_last_free_address = PAGE_SIZE;
+    *m_last_free_address = 10 * PAGE_SIZE;
     m_instance = this;
 }
 
@@ -23,6 +28,11 @@ void* MemoryManager::kmalloc(u32 size)
     if(size % 12 != 0) // align
     {
         size += 12 - (size % 12);
+    }
+    if((int)*m_last_free_address <= 0)
+    {
+        m_allocator.AllocatePage();
+        *m_last_free_address += PAGE_SIZE;
     }
 
     while(m_page_addr + PAGE_SIZE <  *m_last_free_address + size + 12) // need to Allocate page
@@ -44,5 +54,6 @@ void* MemoryManager::kmalloc(u32 size)
 
 MemoryManager* MemoryManager::GetInstance()
 {
+
     return m_instance;
 }

@@ -16,6 +16,7 @@ extern "C"
     #include "../MemoryAllocation/Paging.h"
     #include "../MemoryAllocation/MemoryManager.h"
 #include "../drivers/ATA.h"
+#include "../FileSystemEXT2/EXT2System.h"
     void kernel_main(BootingInfo&,u32,u32);
 }
 
@@ -36,13 +37,12 @@ void kernel_main(BootingInfo& info, u32 physical_end, u32 virtual_end)
     s.terminal_write_string("Initialize kernel with 2 stage boot sector... Success!\n");
     Util::printf("End of Kernel physic: %x\n",physical_end);
     Util::printf("Setting up paging and heap... Success!\n",physical_end);
-    ATA ata(Primary,Master);
-    ata.ATAIdentify();
-    char *data = ata.ATARead(0,3);
-    Util::printf("[D] data: %x",*(u16*)((u8*) data + 1080));
+
     //detection of memory test
-
-
+    EXT2System system(Primary, Master);
+    system.ReadRootINode();
+    INode* t = system.GetFileByPath((u8*)"/test.txt");
+    Util::printf("%s\n",system.GetContentOfINode(t));
      // initialize the isr and the idt for interrupts.
 
 

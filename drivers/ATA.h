@@ -94,7 +94,7 @@ enum ATADeviceState
 
 struct ATAReadResult
 {
-    char* data;
+    u8* data;
     u32 index_of_sector;
 };
 class ATA
@@ -114,13 +114,13 @@ private:
 public:
     ATA(ATABus, ATAType);
     ~ATA();
-
+    void SetPorts(ATABus, ATAType);
     bool ATAPoll();
 
-    char* ATARead(u32 lba_address, u32 number_of_sectors);
-    char* ATAIdentify();
+    u8* ATARead(u32 lba_address, u32 number_of_sectors);
+    u8* ATAIdentify();
     bool CheckIfError();
-    char* GetReadResult();
+    u8* GetReadResult();
 };
 
 

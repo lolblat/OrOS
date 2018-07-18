@@ -5,33 +5,7 @@
 
 ATA::ATA(ATABus bus, ATAType type)
 {
-    m_ata_bus = bus;
-    m_ata_type = type;
-    if(bus == Primary)
-    {
-        m_data.SetPort(ATA_PRIMARY_IO_BASE_PORT + ATA_REG_DATA_OFFSET);
-        m_features_error.SetPort(ATA_PRIMARY_IO_BASE_PORT + ATA_REG_ERROR_OFFSET);
-        m_sector_count.SetPort(ATA_PRIMARY_IO_BASE_PORT + ATA_REG_SECTOR_COUNT_OFFSET);
-        m_sector_number.SetPort(ATA_PRIMARY_IO_BASE_PORT + ATA_REG_SECTOR_NUMBER_OFFSET);
-        m_cylinder_low.SetPort(ATA_PRIMARY_IO_BASE_PORT + ATA_REG_CYLINDER_LOW_OFFSET);
-        m_cylinder_high.SetPort(ATA_PRIMARY_IO_BASE_PORT + ATA_REG_CYLINDER_HIGH_OFFSET);
-        m_drive_head.SetPort(ATA_PRIMARY_IO_BASE_PORT + ATA_REG_DRIVE_HEAD_OFFSET);
-        m_status_command.SetPort(ATA_PRIMARY_IO_BASE_PORT + ATA_REG_STATUS_OFFSET);
-        m_alt_status.SetPort(ATA_PRIMARY_IO_BASE_PORT + ATA_REG_ALT_STATUS_OFFSET);
-    }
-    else
-    {
-        m_data.SetPort(ATA_SECONDARY_IO_BASE_PORT + ATA_REG_DATA_OFFSET);
-        m_features_error.SetPort(ATA_SECONDARY_IO_BASE_PORT + ATA_REG_ERROR_OFFSET);
-        m_sector_count.SetPort(ATA_SECONDARY_IO_BASE_PORT + ATA_REG_SECTOR_COUNT_OFFSET);
-        m_sector_number.SetPort(ATA_SECONDARY_IO_BASE_PORT + ATA_REG_SECTOR_NUMBER_OFFSET);
-        m_cylinder_low.SetPort(ATA_SECONDARY_IO_BASE_PORT + ATA_REG_CYLINDER_LOW_OFFSET);
-        m_cylinder_high.SetPort(ATA_SECONDARY_IO_BASE_PORT + ATA_REG_CYLINDER_HIGH_OFFSET);
-        m_drive_head.SetPort(ATA_SECONDARY_IO_BASE_PORT + ATA_REG_DRIVE_HEAD_OFFSET);
-        m_status_command.SetPort(ATA_SECONDARY_IO_BASE_PORT + ATA_REG_STATUS_OFFSET);
-        m_alt_status.SetPort(ATA_SECONDARY_IO_BASE_PORT + ATA_REG_ALT_STATUS_OFFSET);
-    }
-    m_state = s_Idle;
+  SetPorts(bus, type);
 }
 
 void ATA::SelectDrive()
@@ -46,7 +20,7 @@ void ATA::SelectDrive()
     }
 }
 
-char* ATA::ATAIdentify()
+u8* ATA::ATAIdentify()
 {
     SelectDrive();
     u32 io_port = 0;
@@ -78,9 +52,9 @@ char* ATA::ATAIdentify()
         }
         if(status & ATA_STATUS_BIT_ERR)
         {
-            return (char*)0;
+            return (u8*)0;
         }
-        char* buffer = (char*)MemoryManager::GetInstance()->kmalloc(512);
+        u8* buffer = (u8*)MemoryManager::GetInstance()->kmalloc(512);
         for(u32 i = 0; i < 256; i ++)
         {
             *(u16*)(buffer + i*2) = m_data.port_word_in();
@@ -89,7 +63,7 @@ char* ATA::ATAIdentify()
     }
     else
     {
-        return (char*)0;
+        return (u8*)0;
     }
 
 }
@@ -124,7 +98,6 @@ bool ATA::ATAPoll()
     u8 status = m_status_command.port_byte_in();
     if(status & (0x1 << ATA_STATUS_BIT_SET_WHEN_DATA_OR_READY) && (!(status & (0x1 << ATA_STATUS_BIT_BUSY))))
     {
-        Util::printf("[D] status bit set\n");
         for(u32 i = 0; i < 256; i++)
         {
             u16 data = m_data.port_word_in();
@@ -133,14 +106,53 @@ bool ATA::ATAPoll()
         m_read_result.index_of_sector += 1;
         return true;
     }
+    else
+    {
+        if(status & (0x1 << ATA_STATUS_BIT_ERR))
+        {
+            Util::printf("[E] Error at ATA !\n");
+        }
+    }
     return false;
 
 }
 
-char* ATA::ATARead(u32 lba_address, u32 number_of_sectors)
+
+void ATA::SetPorts(ATABus bus, ATAType type)
+{
+    m_ata_bus = bus;
+    m_ata_type = type;
+    if(bus == Primary)
+    {
+        m_data.SetPort(ATA_PRIMARY_IO_BASE_PORT + ATA_REG_DATA_OFFSET);
+        m_features_error.SetPort(ATA_PRIMARY_IO_BASE_PORT + ATA_REG_ERROR_OFFSET);
+        m_sector_count.SetPort(ATA_PRIMARY_IO_BASE_PORT + ATA_REG_SECTOR_COUNT_OFFSET);
+        m_sector_number.SetPort(ATA_PRIMARY_IO_BASE_PORT + ATA_REG_SECTOR_NUMBER_OFFSET);
+        m_cylinder_low.SetPort(ATA_PRIMARY_IO_BASE_PORT + ATA_REG_CYLINDER_LOW_OFFSET);
+        m_cylinder_high.SetPort(ATA_PRIMARY_IO_BASE_PORT + ATA_REG_CYLINDER_HIGH_OFFSET);
+        m_drive_head.SetPort(ATA_PRIMARY_IO_BASE_PORT + ATA_REG_DRIVE_HEAD_OFFSET);
+        m_status_command.SetPort(ATA_PRIMARY_IO_BASE_PORT + ATA_REG_STATUS_OFFSET);
+        m_alt_status.SetPort(ATA_PRIMARY_IO_BASE_PORT + ATA_REG_ALT_STATUS_OFFSET);
+    }
+    else
+    {
+        m_data.SetPort(ATA_SECONDARY_IO_BASE_PORT + ATA_REG_DATA_OFFSET);
+        m_features_error.SetPort(ATA_SECONDARY_IO_BASE_PORT + ATA_REG_ERROR_OFFSET);
+        m_sector_count.SetPort(ATA_SECONDARY_IO_BASE_PORT + ATA_REG_SECTOR_COUNT_OFFSET);
+        m_sector_number.SetPort(ATA_SECONDARY_IO_BASE_PORT + ATA_REG_SECTOR_NUMBER_OFFSET);
+        m_cylinder_low.SetPort(ATA_SECONDARY_IO_BASE_PORT + ATA_REG_CYLINDER_LOW_OFFSET);
+        m_cylinder_high.SetPort(ATA_SECONDARY_IO_BASE_PORT + ATA_REG_CYLINDER_HIGH_OFFSET);
+        m_drive_head.SetPort(ATA_SECONDARY_IO_BASE_PORT + ATA_REG_DRIVE_HEAD_OFFSET);
+        m_status_command.SetPort(ATA_SECONDARY_IO_BASE_PORT + ATA_REG_STATUS_OFFSET);
+        m_alt_status.SetPort(ATA_SECONDARY_IO_BASE_PORT + ATA_REG_ALT_STATUS_OFFSET);
+    }
+    m_state = s_Idle;
+}
+
+u8* ATA::ATARead(u32 lba_address, u32 number_of_sectors)
 {
 
-    m_read_result.data = (char*)MemoryManager::GetInstance()->kmalloc(number_of_sectors * ATA_SECTOR_SIZE);
+    m_read_result.data = (u8*)MemoryManager::GetInstance()->kmalloc(number_of_sectors * ATA_SECTOR_SIZE);
     m_read_result.index_of_sector = 0;
     for(u32 i = 0; i < number_of_sectors; i ++)
     {
@@ -151,7 +163,7 @@ char* ATA::ATARead(u32 lba_address, u32 number_of_sectors)
     return this->GetReadResult();
 }
 
-char* ATA::GetReadResult()
+u8* ATA::GetReadResult()
 {
     return m_read_result.data;
 }

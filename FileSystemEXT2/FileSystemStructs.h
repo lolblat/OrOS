@@ -17,6 +17,7 @@
 #define SYMBOLIC_LINK_FILE_TYPE 0xA000
 #define UNIX_SOCKET_FILE_TYPE 0xC000
 #define INODE_DIRECT_POINTERS_LENGTH 12
+#define EXT2_TYPE_MASK 0xF000
 
 #define DIR_MAX_NAME_LENGTH 255
 //permission defines
@@ -34,6 +35,7 @@
 #define SET_USER_ID 0x800
 
 #define SUPER_BLOCK_MAGIC_NUMBER 0xEF53
+
 struct SuperBlock
 {
     u32 number_of_inodes;
@@ -61,7 +63,7 @@ struct SuperBlock
     u32 major_version;
     u16 user_id_for_blocks;
     u16 group_id_for_blocks;
-
+    u8 padd[940];
 }__attribute__((packed));
 
 struct BlockGroupDescriptor
@@ -87,15 +89,15 @@ struct INode
     u32 deletion_time;
     u16 group_id;
     u16 hard_link_count;
-    u16 disk_sectors_in_use;
+    u32 disk_sectors_in_use;
     u32 flags;
     u32 op_spec_1;
 
     //12 fast ptr
-    u32 direct_block_ptr[INODE_DIRECT_POINTERS_LENGTH]
-    u32** block_of_ptr; // ptr to block that is a list of 1000 ptr's to data
-    u32*** block_of_blocks_ptr;  // ptr to block of blocks
-    u32**** block_of_blocks_of_blocks_ptr; // ptr to block of blocks of blocks
+    u32 direct_block_ptr[INODE_DIRECT_POINTERS_LENGTH];
+    u32 block_of_ptr; // ptr to block that is a list of 1000 ptr's to data
+    u32 block_of_blocks_ptr;  // ptr to block of blocks
+    u32 block_of_blocks_of_blocks_ptr; // ptr to block of blocks of blocks
 
 
     u32 gen_number;
@@ -121,5 +123,84 @@ struct Directory
     u8 name_string[DIR_MAX_NAME_LENGTH];
 }__attribute__((packed));
 
+class NameListNode
+{
+private:
+    u8* name;
+    NameListNode* next;
+public:
+    NameListNode(u8* name)
+    {
+        this->name = name;
+        this->next = (NameListNode*)0;
+    }
+    void AddNext(NameListNode* name)
+    {
+        next = name;
+    }
+    u8* GetName()
+    {
+        return name;
+    }
+    NameListNode* GetNext()
+    {
+        return next;
+    }
+
+};
+
+class NameList
+{
+private:
+    NameListNode* last;
+    NameListNode* start;
+public:
+    NameList()
+    {
+        start = (NameListNode*)0;
+        last = (NameListNode*)0;
+    }
+    void AddNodeList(NameListNode* list_node)
+    {
+        if(start == (NameListNode*)0 && (NameListNode*)last == 0) // first
+        {
+            start = list_node;
+            last = start;
+        }
+        else
+        {
+            last->AddNext(list_node);
+            last = list_node;
+        }
+    }
+
+    u32 GetSize()
+    {
+        NameListNode* p = start;
+        u32 sum = 0;
+        while(p)
+        {
+            sum++;
+            p = p->GetNext();
+        }
+        return sum;
+    }
+
+    u8* GetNameAt(u32 i)
+    {
+        if(i >= GetSize())
+        {
+            return (u8*)0;
+        }
+        NameListNode* ptr = start;
+        for(u32 k = 0; k < i; k++)
+        {
+            ptr = ptr->GetNext();
+        }
+
+        return ptr->GetName();
+    }
+
+};
 
 #endif //OROS_INODE_H

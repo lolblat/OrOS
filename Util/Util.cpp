@@ -11,9 +11,9 @@
  * Count the chars in a given str.
  *
  */
-u32 Util::strlen(const char* str )
+u32 Util::strlen(const u8* str )
 {
-    const char * tmp  = str;
+    const u8 * tmp  = str;
     u32 sum = 0;
     while(*tmp)
     {
@@ -81,6 +81,55 @@ void Util::to_hex(u64 number, char* buffer)
         buffer[i + 2] = '0';
     }
 
+}
+
+u32 Util::strcmp(const u8 *str1, const u8 *str2)
+{
+    if(strlen(str1) > strlen(str2))
+    {
+        return 1;
+    }
+    else if(strlen(str2) > strlen(str1))
+    {
+        return -1;
+    }
+    else
+    {
+        for(u32 i = 0; i < strlen(str1); i++)
+        {
+            if(*str1 > *str2)
+            {
+                return 1;
+            }
+            else if(*str2 > *str1)
+            {
+                return -1;
+            }
+        }
+    }
+    return 0;
+}
+const u8* Util::strstr(const u8 *str1, const u8 *str2)
+{
+    const u8* ptr = str1;
+    const u8* ptr2 = str2;
+    while(*ptr != '\x00')
+    {
+        if(!(*ptr2)) // end of str2, need to return.
+        {
+            return (ptr - strlen((const u8*)str2));
+        }
+        if(*ptr == *ptr2)
+        {
+            ptr2++;
+        }
+        else
+        {
+            ptr2 = str2;
+        }
+        ptr++;
+    }
+    return (const u8*)0;
 }
 
 /*
@@ -183,3 +232,15 @@ void Util::printf(const char *str, ...)
     va_end(args);
 }
 
+
+void Util::strsplit(u8 *str1, u8 det)
+{
+    while(*str1)
+    {
+        if(*str1 == det)
+        {
+            *str1 = '\x00';
+        }
+        str1++;
+    }
+}
