@@ -77,6 +77,16 @@ u8* EXT2System::ReadBlock(u32 block_number)
 
 }
 
+void EXT2System::WriteBlock(u8 *data, u32 block_number, u32 size)
+{
+    u32 sectors = m_sectors_per_block;
+    if(sectors == 0)
+    {
+        sectors = 1;
+    }
+    m_hard_disk->ATAWriteSectors(data, sectors * block_number, size);
+}
+
 INode* EXT2System::ReadRootINode()
 {
     INode* root = (INode*)ReadInode(EXT2_ROOT_INODE);
@@ -190,7 +200,6 @@ INode* EXT2System::GetFileByPath(u8 *path)
 
     while(*path != '\x00')
     {
-        Util::printf("[D]%d\n",*path);
         bool found = false;
         for(u32 i = 0; i < 12; i++)
         {
@@ -209,7 +218,6 @@ INode* EXT2System::GetFileByPath(u8 *path)
         }
         if(found)
         {
-            Util::printf("[D]%s\n",path);
             path += Util::strlen(path);
         }
         else
@@ -235,4 +243,160 @@ INode* EXT2System::FindIfFileInDir(Directory *dir, u8* file)
         dir = (Directory*)((u8*)dir + dir->total_size_of_entry);
     }
     return (INode*)0;
+}
+
+u32 EXT2System::AllocateBlock()
+{
+    BlockGroupDescriptor* desc = (BlockGroupDescriptor*)ReadBlock(m_block_group_descriptor_block);
+    for(u32 i = 0; i < m_total_number_of_block_groups; i++)
+    {
+        if(desc->number_of_unallocated_blocks_in_group)
+        {
+            u32 block_number = m_super_block->number_of_blocks_in_each_group - desc->number_of_unallocated_blocks_in_group + 1;
+            desc->number_of_unallocated_blocks_in_group--;
+            WriteBlock((u8*)desc, m_block_group_descriptor_block + i, m_size_of_each_block);
+
+            m_super_block->number_of_unallocated_blocks--;
+            WriteBlock((u8*)m_super_block, m_super_block->block_number_of_superblock, m_size_of_each_block);
+            return block_number;
+        }
+        desc++;
+    }
+    return -1;
+}
+
+u32 EXT2System::AllocateINode()
+{
+    BlockGroupDescriptor* desc = (BlockGroupDescriptor*)ReadBlock(m_block_group_descriptor_block);
+    for(u32 i = 0; i < m_total_number_of_block_groups; i++)
+    {
+        if(desc->number_of_unallocated_inodes_in_group)
+        {
+            u32 inode_number = ((i + 1) * m_super_block->number_of_inodes_in_each_group) - desc->number_of_unallocated_inodes_in_group + 1;
+            // the (i+1) mul is for the inode indexing system, inode starts from 1...n
+            desc->number_of_unallocated_inodes_in_group--;
+            WriteBlock((u8*)desc, m_block_group_descriptor_block + i, m_size_of_each_block);
+
+            m_super_block->number_of_unallocated_inodes--;
+            WriteBlock((u8*)m_super_block, m_super_block->block_number_of_superblock, m_size_of_each_block);
+            return inode_number;
+        }
+        desc++;
+    }
+    return -1;
+}
+
+void EXT2System::WriteToINode(INode *data, u32 inode_number, u32 size)
+{
+    u32 block_group_number = (inode_number - 1) / m_number_of_inodes_in_block_group;
+    BlockGroupDescriptor* desc = (BlockGroupDescriptor*)ReadBlock(m_block_group_descriptor_block);
+    for(u32 i = 0; i < block_group_number; i++)
+    {
+        desc++;
+    }
+
+    u32 index_in_group = (inode_number - 1) % m_number_of_inodes_in_block_group;
+    u32 m_block = (index_in_group * sizeof(INode)) / m_size_of_each_block;
+    u32 final_index = desc->starting_block_address_of_inode_table + m_block;
+    INode* inode = (INode*)ReadBlock(final_index);
+    index_in_group = index_in_group % m_inodes_per_block;
+    for(u32 i = 0;  i < index_in_group; i++)
+    {
+        inode ++;
+    }
+
+    // found inode
+    Util::memcopy((void*)data, (void*)inode, sizeof(INode));
+    WriteBlock((u8*)inode, final_index, sizeof(INode));
+}
+
+void EXT2System::WriteToFile(u8 *file_name, u8 *data, u32 size)
+{
+    INode* file_inode = GetFileByPath(file_name);
+    if(file_inode == (INode*)0) // no such file, need to create the file.
+    {
+        u32 inode_number = AllocateINode();
+        Util::printf("Node number: %d\n",inode_number);
+        INode* inode = (INode*)MemoryManager::GetInstance()->kmalloc(sizeof(INode));
+        u32 blocks_for_inode = size / m_size_of_each_block;
+        blocks_for_inode++; // need at least one, and its better one more block the lose data in the division.
+        if(blocks_for_inode > 12)
+        {
+            Util::printf("[D] need to implement\n");
+            return;
+        }
+
+        for(u32 i = 0; i < blocks_for_inode; i++)
+        {
+            u32 block_number = AllocateBlock();
+            Util::printf("Allocated block: %d\n",block_number);
+            inode->direct_block_ptr[i] = block_number;
+        }
+        inode->lower_32_bits_size = size;
+        WriteToINode(inode, inode_number, sizeof(INode));
+
+        for(u32 i = 0; i < blocks_for_inode; i++)
+        {
+            u8* block = ReadBlock(inode->direct_block_ptr[i]);
+            u32 size_written = m_size_of_each_block;
+            if(i +1 < blocks_for_inode)
+            {
+                Util::memcopy(data + i * m_size_of_each_block, block, size_written);
+            }
+            else // last block
+            {
+                size_written = size;
+                Util::memcopy(data + i*m_size_of_each_block, block, size_written);
+            }
+            WriteBlock(block, inode->direct_block_ptr[i], size);
+            size -= m_size_of_each_block;
+        }
+        return;
+    }
+    else
+    {
+        // we will overwrite the data;
+        // first we need to check if we need more blocks for the file.
+        u32 number_of_blocks_in_inode = file_inode->lower_32_bits_size / m_size_of_each_block;
+        u32 number_of_blocks_needed = size / m_size_of_each_block;
+        u32 final_number_of_blocks = 0;
+        if(number_of_blocks_needed > number_of_blocks_in_inode)
+        {
+
+            for(u32 i = number_of_blocks_in_inode; i < number_of_blocks_needed; i++)
+            {
+                u32 block_number = AllocateBlock();
+                file_inode->direct_block_ptr[i] = block_number;
+            }
+            final_number_of_blocks = number_of_blocks_needed;
+        }
+        else
+        {
+            final_number_of_blocks = number_of_blocks_in_inode;
+        }
+        file_inode->lower_32_bits_size = size;
+        for(u32 i = 0; i < final_number_of_blocks; i++)
+        {
+            u8* block_desc = ReadBlock(file_inode->direct_block_ptr[i]);
+            if(size == 0 ) // just fill with null's
+            {
+                Util::memset(block_desc,m_size_of_each_block, '\x00');
+
+            }
+            else if(size < m_size_of_each_block)
+            {
+                Util::memcopy(data + i * m_size_of_each_block, block_desc, size);
+                Util::memset(block_desc + size, m_size_of_each_block - size, '\x00');
+            }
+            else
+            {
+                Util::memcopy(data + i* m_size_of_each_block,block_desc,m_size_of_each_block);
+            }
+            WriteBlock(block_desc, file_inode->direct_block_ptr[i], m_size_of_each_block);
+            size -= m_size_of_each_block;
+        }
+
+        //TODO: need to write write back to the ata driver of the "new" inode
+        return;
+    }
 }

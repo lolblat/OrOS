@@ -167,3 +167,51 @@ u8* ATA::GetReadResult()
 {
     return m_read_result.data;
 }
+void ATA::ATAWriteSector(u8 *data, u32 lba_address, u32 size)
+{
+    u8* replaced_sector = ATARead(lba_address,1);
+    u8* res = data;
+    if(size != ATA_SECTOR_SIZE) // need to fill up
+    {
+        res = (u8*)MemoryManager::GetInstance()->kmalloc(ATA_SECTOR_SIZE); // first create a sector size buffer.
+        Util::memcopy(data, res, size);
+        Util::memcopy(replaced_sector, res + size, ATA_SECTOR_SIZE - size);
+    }
+    m_drive_head.port_byte_out((m_ata_type == Master ? ATA_READ_MASTER : ATA_READ_SLAVE) | ((lba_address >> 24) & 0x0F)); // select drive;
+    u32 number_of_transfers = (ATA_SECTOR_SIZE)/(sizeof(u16));
+    m_sector_count.port_byte_out(1);
+    m_sector_number.port_byte_out((u8)lba_address);
+    m_cylinder_low.port_byte_out((u8)lba_address >> 8);
+    m_cylinder_high.port_byte_out((u8)lba_address >> 16);
+
+    m_status_command.port_byte_out(ATA_COMMAND_WRITE_SECTORS);
+
+    for(u32 i = 0; i < number_of_transfers; i++, res += 2)
+    {
+        u16 short_data = *(u16*)res;
+        m_data.port_word_out(short_data);
+        for(u32 k = 0; k < ATA_WRITE_DELAY; k++);
+    }
+
+    m_status_command.port_byte_out(ATA_COMMAND_CACHE_FLUSH);
+}
+
+void ATA::ATAWriteSectors(u8 *data, u32 lba_address, u32 size)
+{
+    while(size > 0)
+    {
+        if(size > ATA_SECTOR_SIZE)
+        {
+            ATAWriteSector(data,lba_address,ATA_SECTOR_SIZE);
+            data += ATA_SECTOR_SIZE;
+            lba_address += 1;
+            size -= ATA_SECTOR_SIZE;
+        }
+        else
+        {
+            ATAWriteSector(data, lba_address, size);
+            break;
+        }
+    }
+
+}

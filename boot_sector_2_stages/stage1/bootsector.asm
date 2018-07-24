@@ -20,6 +20,8 @@ boot:
 
     mov bx,stage2_start
     mov al, (stage2_start - stage1_start) / 512 ;512 - size of secto
+    mov ah,0
+    mov si,ax
     mov ch,0
     mov cl,2
     mov dh,0
@@ -32,13 +34,52 @@ boot:
     ;2) jmp to stage2
 
 ;use chs addressing system.
-;al - total sector count max 72
-;ch - cylinder & 0xff
-;cl - sector|((cylinder >> 2)& 0xC0)
-;dh - head
-;es:bx - read to buffer
-;dl - drive number
+;si total sector count to read
+;al will be equal 1
+;cl sector number to read
+;dh head
+;bx buffer
+
 load:
+    mov di,0
+    load_loop:
+    cmp si,0
+    jz end
+
+    push bx
+    add bx,di ; add to buffer
+    jnc not_add_es
+    push ax
+    mov ax,es
+    mov ax,0x1000
+    mov es,ax
+    pop ax
+
+    not_add_es:
+    add di,512
+
+    call load_one_sector
+    inc cl
+    cmp cl, 18
+    jbe dont_inc_head
+    mov cl,1
+    cmp dh,1
+    jne dont_inc_cyl
+    mov dh,0
+    inc ch
+    jmp after
+    dont_inc_cyl:
+    inc dh
+    after:
+    dont_inc_head:
+    pop bx
+    dec si
+    jmp load_loop
+
+    end_of_loop:
+    ret
+load_one_sector:
+    mov al,1
     mov ah,2
     mov dl,[BOOT_FROM_DISK]
 
@@ -46,7 +87,8 @@ load:
     jc error
 
     ret
-
+end:
+    ret
 
 error: ;error in all bootsector
     mov cx, ERROR_PRINT
@@ -55,8 +97,9 @@ error: ;error in all bootsector
 
 %include "stage1/print.asm"
 
-ERROR_PRINT db "[E] Error in program",0
+ERROR_PRINT db "[E] Error in program - disk",0
 STAGE_1_STARTED db "[D] Stage 1 started :)",0
 BOOT_FROM_DISK equ 0x0
+
 times 510-($-$$) db 0
 dw 0xaa55

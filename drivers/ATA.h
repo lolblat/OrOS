@@ -70,7 +70,9 @@ using namespace drivers;
 
 #define ATA_COMMAND_IDENTIFY 0xEC
 #define ATA_COMMAND_READ_SECTORS 0x20
-
+#define ATA_COMMAND_WRITE_SECTORS 0x30
+#define ATA_COMMAND_CACHE_FLUSH 0xE7
+#define ATA_WRITE_DELAY 50
 #define ATA_READ_MASTER 0xE0
 #define ATA_READ_SLAVE 0xF0
 enum ATABus
@@ -110,6 +112,7 @@ private:
     void SelectDrive();
     void ATADelay();
     void ATAReadSector(u32 lba_address);
+    void ATAWriteSector(u8* data, u32 lba_address, u32 size);
 
 public:
     ATA(ATABus, ATAType);
@@ -118,6 +121,7 @@ public:
     bool ATAPoll();
 
     u8* ATARead(u32 lba_address, u32 number_of_sectors);
+    void ATAWriteSectors(u8* data, u32 lba_address, u32 size);
     u8* ATAIdentify();
     bool CheckIfError();
     u8* GetReadResult();

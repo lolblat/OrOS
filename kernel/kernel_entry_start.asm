@@ -6,26 +6,8 @@ PAGE_SIZE equ 0x1000
 extern kernel_main
 global _loader
 
-section .data
-align 0x1000
-BootPageDir:
-    times 1024 dd 0x2 ;not present, read write and kernel only
-
-;%assign i 0
-;%rep 769
-;TableEntry_%+i:
- ;   times 1024 dd 0x3
-;%assign i i + 1
-;%endrep
-TableEntry_0: ; for the first mb
-    times 1024 dd 0x3
-
-TableEntry_768: ; for the kernel
-    times 1024 dd 0x3
-
 section .text
-align 4
-
+align 0x1000
 loader equ (_loader - 0xC0000000)
 
 STACK_SIZE equ 0x4000
@@ -33,8 +15,6 @@ STACK_SIZE equ 0x4000
 _loader:
     push edx
     push ebx
-
-
     mov ecx,0
     .loop: ;4mb identity mapping
         cmp ecx, 1024
@@ -65,6 +45,7 @@ _loader:
         jmp .loop_768
     .end_768:
 
+
     mov ecx,(BootPageDir - KERNEL_VIRTUAL_ADDRESS_BASE)
     mov ebx,ecx
 
@@ -77,6 +58,7 @@ _loader:
     add ebx, KERNEL_PAGE_TABLE_ENTRY * 4 ; get the kernel pages
     mov dword[ebx], edx
     mov cr3, ecx ; base dir address
+
 
 
     mov ecx,cr0
@@ -108,4 +90,10 @@ HighHalfBitch:
 
 
 
+
+section .data
+align 0x1000
+BootPageDir times 1024 dd 0x2 ;not present, read write and kernel only
+TableEntry_0 times 1024 dd 0x3; for the first mb
+TableEntry_768 times 1024 dd 0x3; for the kernel
 

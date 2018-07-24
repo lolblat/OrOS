@@ -28,11 +28,13 @@ private:
 
     u32 m_block_group_descriptor_block;
 
-
+    u32 AllocateBlock();
+    u32 AllocateINode();
     void ReadSuperBlock();
 public:
     EXT2System(ATABus, ATAType);
     u8* ReadBlock(u32 block_number);
+    void WriteBlock(u8* data, u32 block_number, u32 size);
     u8* ReadSingleLinked(u32 block_id_for_linked);
     u8* ReadDoubleLinked(u32 block_id_for_linked);
     INode* ReadInode(u32 inode_number);
@@ -41,6 +43,10 @@ public:
     INode* GetFileByPath(u8* path);
     void ReadDirContent(Directory* entries);
     INode* FindIfFileInDir(Directory* dir, u8* file);
+    void AppendToDir(u8* name_of_dir, );
+
+    void WriteToINode(INode* data, u32 inode_number, u32 size);
+    void WriteToFile(u8* file_name, u8* data, u32 size);
     ~EXT2System();
 
 

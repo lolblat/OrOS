@@ -1,4 +1,4 @@
-start_up_stage_2:
+start_up_stage_2: ; 7e1f
     mov ecx, STAGE_2_WELCOME
     call print_string
 
@@ -30,23 +30,22 @@ load_kernel_to_memory: ; 0x7e24 on bochs
             ;2.3) load to high address
     push eax
     push ecx
-
-
-    mov al,(kernel_end - kernel_start) / 512 ; first sector of kernel
-    mov bx,stage2_end ;tmp buffer
-    mov ch,0
+    mov bx, stage2_end
+    mov si,(kernel_end - kernel_start) / 512 ; size of kernel by sector count
     mov cl,(kernel_start-stage1_start)/ 512 + 1
-    mov dh,0
-
+    mov ch,0
+    xor dx,dx
     call load
+    ; maybe split
 
-
+    mov ax,0
+    mov es,ax
     call unreal
 
     mov edi,KERNEL_ADDR
     mov esi,stage2_end
 
-    mov ecx, 512 * 127
+    mov ecx, 512 * 256
     cld
     a32 rep movsb
     pop ecx
@@ -69,7 +68,7 @@ booting_info:
     .memory_map_count: dd 0
 
 STAGE_2_WELCOME db "[D] Welcome to stage 2 of the boot :)",0
-KERNEL_ADDR: equ 0x100000
+KERNEL_ADDR: equ 0x200000
 
 
 %include "stage2/unreal_mod.asm"
