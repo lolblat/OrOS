@@ -180,9 +180,9 @@ void ATA::ATAWriteSector(u8 *data, u32 lba_address, u32 size)
     m_drive_head.port_byte_out((m_ata_type == Master ? ATA_READ_MASTER : ATA_READ_SLAVE) | ((lba_address >> 24) & 0x0F)); // select drive;
     u32 number_of_transfers = (ATA_SECTOR_SIZE)/(sizeof(u16));
     m_sector_count.port_byte_out(1);
-    m_sector_number.port_byte_out((u8)lba_address);
-    m_cylinder_low.port_byte_out((u8)lba_address >> 8);
-    m_cylinder_high.port_byte_out((u8)lba_address >> 16);
+    m_sector_number.port_byte_out((u8)(lba_address));
+    m_cylinder_low.port_byte_out((u8)(lba_address >> 8));
+    m_cylinder_high.port_byte_out((u8)(lba_address >> 16));
 
     m_status_command.port_byte_out(ATA_COMMAND_WRITE_SECTORS);
 

@@ -9,6 +9,8 @@
 #define EXT2_ROOT_INODE 2
 #include "FileSystemStructs.h"
 #include "../drivers/ATA.h"
+
+
 // defines an ext2 file system on specific ATA hard disk.
 class EXT2System
 {
@@ -43,8 +45,8 @@ public:
     INode* GetFileByPath(u8* path);
     void ReadDirContent(Directory* entries);
     INode* FindIfFileInDir(Directory* dir, u8* file);
-    void AppendToDir(u8* name_of_dir, );
-
+    void AppendToDir(INode* d, u32 inode_to_append, u8* path_to_append_to, u8 file_type);
+    bool AppendEntry(u32 block_number_of_dir ,Directory* add_entry);
     void WriteToINode(INode* data, u32 inode_number, u32 size);
     void WriteToFile(u8* file_name, u8* data, u32 size);
     ~EXT2System();

@@ -233,14 +233,44 @@ void Util::printf(const char *str, ...)
 }
 
 
-void Util::strsplit(u8 *str1, u8 det)
+u32 Util::strsplit(u8 *str1, u8 det)
 {
+    u32 counter = 0;
     while(*str1)
     {
         if(*str1 == det)
         {
             *str1 = '\x00';
+            counter++;
         }
         str1++;
     }
+    return counter;
+}
+
+u32 Util::strcharcount(const u8* src, const char delm)
+{
+  u32 counter = 0;
+  while(*src)
+  {
+    if(*src == delm)
+    {
+      counter++;
+    }
+    src++;
+  }
+  return counter;
+}
+
+void Util::strpos( u8* str, const char dem)
+{
+  while(*str)
+  {
+    if(*str == dem)
+    {
+      *str = '\x00';
+      return;
+    }
+    str++;
+  }
 }

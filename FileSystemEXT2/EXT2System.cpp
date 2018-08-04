@@ -115,24 +115,28 @@ void EXT2System::ReadDirContent(Directory *entries)
         u8* name = (u8*)MemoryManager::GetInstance()->kmalloc(entries->name_length_least_bits);
         Util::memcopy(entries->name_string, name, entries->name_length_least_bits);
         name[entries->name_length_least_bits] = 0;
-        Util::printf("[D] found entry: %d %s\n",entries->inode, name);
+        Util::printf("[D] found entry: %d %s %d type: %d\n",entries->inode, name, entries->total_size_of_entry, entries->type_indicator);
         entries = (Directory*)((u8*)entries + entries->total_size_of_entry);
+
     }
 }
 
 u8* EXT2System::GetContentOfINode(INode* inode)
 {
     u32 first_size = inode->lower_32_bits_size;
+
     u8* array = (u8*)MemoryManager::GetInstance()->kmalloc(first_size);
     u8* ptr_to_insert = array;
     for(u32 i = 0; i < 12; i ++)
     {
         u32 fast_ptr_block = inode->direct_block_ptr[i];
+        Util::printf("%d\n",fast_ptr_block);
         if(fast_ptr_block == 0)
         {
             break;
         }
         u8* block = (u8*)ReadBlock(fast_ptr_block);
+
         Util::memcopy(block, ptr_to_insert, m_size_of_each_block);
         ptr_to_insert += m_size_of_each_block;
     }
@@ -238,6 +242,7 @@ INode* EXT2System::FindIfFileInDir(Directory *dir, u8* file)
         n[dir->name_length_least_bits] = '\x00';
         if(n && Util::strcmp(n,file) == 0)
         {
+
             return ReadInode(dir->inode);
         }
         dir = (Directory*)((u8*)dir + dir->total_size_of_entry);
@@ -318,6 +323,7 @@ void EXT2System::WriteToFile(u8 *file_name, u8 *data, u32 size)
         u32 inode_number = AllocateINode();
         Util::printf("Node number: %d\n",inode_number);
         INode* inode = (INode*)MemoryManager::GetInstance()->kmalloc(sizeof(INode));
+        Util::memset(inode, sizeof(INode), '\x00');
         u32 blocks_for_inode = size / m_size_of_each_block;
         blocks_for_inode++; // need at least one, and its better one more block the lose data in the division.
         if(blocks_for_inode > 12)
@@ -339,6 +345,7 @@ void EXT2System::WriteToFile(u8 *file_name, u8 *data, u32 size)
         {
             u8* block = ReadBlock(inode->direct_block_ptr[i]);
             u32 size_written = m_size_of_each_block;
+
             if(i +1 < blocks_for_inode)
             {
                 Util::memcopy(data + i * m_size_of_each_block, block, size_written);
@@ -351,6 +358,8 @@ void EXT2System::WriteToFile(u8 *file_name, u8 *data, u32 size)
             WriteBlock(block, inode->direct_block_ptr[i], size);
             size -= m_size_of_each_block;
         }
+        Util::printf("[D] added file to table\n");
+        AppendToDir(ReadRootINode(),inode_number, file_name, 1);
         return;
     }
     else
@@ -399,4 +408,89 @@ void EXT2System::WriteToFile(u8 *file_name, u8 *data, u32 size)
         //TODO: need to write write back to the ata driver of the "new" inode
         return;
     }
+}
+
+void EXT2System::AppendToDir(INode* d, u32 inode_to_append, u8* path_to_append_to, u8 file_type)
+{
+  //INode* root_inode = ReadRootINode();
+  if(*path_to_append_to == '/') // first one.
+  {
+    *path_to_append_to = '\x00';
+    path_to_append_to++;
+  }
+
+  for(u32 i = 0; i < 12; i++)
+  {
+      if(d->direct_block_ptr[i] == 0)
+      {
+        break;
+      }
+
+      if(Util::strcharcount(path_to_append_to, '/') == 0) // last one, need to append as entry
+      {
+
+        Directory dir;
+        Util::memset(&dir, sizeof(Directory), '\x00');
+        dir.inode = inode_to_append;
+        dir.total_size_of_entry = sizeof(u32) + sizeof(u16) + sizeof(u8) + sizeof(u8) + Util::strlen(path_to_append_to) + 1;
+        dir.name_length_least_bits = Util::strlen(path_to_append_to);
+        dir.type_indicator = file_type;
+        Util::printf("AddNode: %d\n",dir.inode);
+        Util::memcopy(path_to_append_to, dir.name_string, Util::strlen(path_to_append_to));
+        if(AppendEntry((d->direct_block_ptr[i]), &dir))
+        {
+          return;
+        }
+      }
+      else // move to next dir
+      {
+        Directory* tmp = (Directory*)ReadBlock(d->direct_block_ptr[i]);
+        INode *file = (INode*)0;
+        if((file = FindIfFileInDir(tmp, path_to_append_to)) != (INode*)0) // found dir!
+        {
+          AppendToDir(file, inode_to_append, (path_to_append_to + Util::strlen(path_to_append_to)), file_type);
+        }
+      }
+  }
+}
+
+bool EXT2System::AppendEntry(u32 block_number_of_dir, Directory* append)
+{
+
+  Directory* dir = (Directory*)ReadBlock(block_number_of_dir);
+  u8* ptr = (u8*)dir;
+  u32 real_size = DIRECTORY_PADDING + append->name_length_least_bits;
+
+  u32 counter = 0;
+
+  while(dir->inode != 0)
+  {
+    Util::printf("[?]%s\n", dir->name_string);
+    u32 true_size = dir->name_length_least_bits + DIRECTORY_PADDING;
+    true_size += 4 - true_size % 4; //padding
+
+    if(dir->total_size_of_entry != true_size) // last one!
+    {
+      dir->total_size_of_entry = true_size;
+      counter += dir->total_size_of_entry;
+      dir = (Directory*)((u8*)dir + dir->total_size_of_entry);
+      append->total_size_of_entry = m_size_of_each_block - counter;
+      break;
+    }
+    counter += dir->total_size_of_entry;
+    dir = (Directory*)((u8*)dir + dir->total_size_of_entry);
+
+  }
+
+  Util::memcopy(append, dir, append->total_size_of_entry);
+
+  Directory* ptr2 = (Directory*)ptr;
+  while(ptr2->inode != 0)
+  {
+    ptr2 = (Directory*)((u8*)ptr2 + ptr2->total_size_of_entry);
+  }
+
+  WriteBlock((u8*)ptr, block_number_of_dir, m_size_of_each_block);
+  return true;
+
 }

@@ -19,6 +19,8 @@
 #define INODE_DIRECT_POINTERS_LENGTH 12
 #define EXT2_TYPE_MASK 0xF000
 
+
+
 #define DIR_MAX_NAME_LENGTH 255
 //permission defines
 #define OTHER_EXECUTE 0x001
@@ -122,6 +124,7 @@ struct Directory
     u8 type_indicator;
     u8 name_string[DIR_MAX_NAME_LENGTH];
 }__attribute__((packed));
+#define DIRECTORY_PADDING sizeof(u32) + sizeof(u16) + sizeof(u8) + sizeof(u8)
 
 class NameListNode
 {

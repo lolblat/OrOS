@@ -19,7 +19,9 @@ extern "C"
             static void to_hex(u64 number,char* buffer);
             static const u8* strstr(const u8* str1, const u8* str2);
             static u32 strcmp(const u8* str1, const u8* str2);
-            static void strsplit(u8* str1, u8 det);
+            static u32 strcharcount(const u8* str1, const char c);
+            static void strpos(u8* str1, const char dem);
+            static u32 strsplit(u8* str1, u8 det);
             static void memcopy(void* src, void* dst, u32 size);
             static void memset(void* src, u32 size, char data);
             static void memread(void* src, void* dst, u32 size_of_var, u32 n);

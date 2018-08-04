@@ -40,11 +40,16 @@ void kernel_main(BootingInfo& info, u32 physical_end, u32 virtual_end)
 
     //detection of memory test
     EXT2System system(Primary, Master);
+
+
+
+    system.WriteToFile((u8*)"/abcd.txt",(u8*)"1234",4);
     system.ReadRootINode();
-    INode* t = system.GetFileByPath((u8*)"/test.txt");
+    INode* t = system.GetFileByPath((u8*)"/abcd.txt");
     Util::printf("%s\n",system.GetContentOfINode(t));
+
     // initialize the isr and the idt for interrupts.
-    system.WriteToFile((u8*)"/abc.txt",(u8*)"123",3);
+
 
     CPU::Timer timer;
     //we want freq of 50.
