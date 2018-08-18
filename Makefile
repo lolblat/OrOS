@@ -4,8 +4,8 @@ BOOT_DIR := boot
 CC := i686-elf-g++
 LD := i686-elf-ld
 CPPFLAGS := -Wall -ffreestanding -g -fno-exceptions
-CPP_SOURCES = $(wildcard drivers/*.cpp cpu/*.cpp Util/*.cpp cpu/interrupts/*.cpp MemoryAllocation/Paging.cpp MemoryAllocation/BitMapAllocator.cpp MemoryAllocation/MemoryManager.cpp FileSystemEXT2/*.cpp)
-CPP_HEADERS = $(wildcard drivers/*.h cpu/*.h Util/*.h cpu/interrupts/*.h MemoryAllocation/Paging.h MemoryAllocation/BitMapAllocator.h  MemoryAllocation/MemoryManager.h FileSystemEXT2/*.h)
+CPP_SOURCES = $(wildcard drivers/*.cpp cpu/*.cpp Util/*.cpp cpu/interrupts/*.cpp MemoryAllocation/Paging.cpp MemoryAllocation/BitMapAllocator.cpp MemoryAllocation/MemoryManager.cpp FileSystemEXT2/*.cpp MemoryAllocation/Operators.cpp)
+CPP_HEADERS = $(wildcard drivers/*.h cpu/*.h Util/*.h cpu/interrupts/*.h MemoryAllocation/Paging.h MemoryAllocation/BitMapAllocator.h  MemoryAllocation/MemoryManager.h FileSystemEXT2/*.h MemoryAllocation/Operators.h)
 ASM_FILES = $(wildcard cpu/interrupts/*.asm )
 OBJ = ${CPP_SOURCES:.cpp=.o}
 ASM_OBJ_FILE = ${ASM_FILES:.asm=.o}
@@ -14,7 +14,6 @@ all: os-image
 
 os-image: kernel.bin booting.bin
 	cat $(KERNEL_DIR)/booting.bin $(KERNEL_DIR)/kernel.bin > boot/os-image
-	cd $(BOOT_DIR) && bochs
 
 booting.bin:
 	cd boot_sector_2_stages && $(MAKE)

@@ -31,7 +31,7 @@ extern "C"
         public:
             MemoryManager(u32 *start_addr, u32 *end_addr);
             void *kmalloc(u32 size);
-            void free(u32 *addr);
+            void kfree(u32 *addr);
             static MemoryManager* GetInstance();
 
     };

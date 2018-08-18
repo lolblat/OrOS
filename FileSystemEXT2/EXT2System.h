@@ -5,7 +5,6 @@
 #ifndef OROS_EXT2SYSTEM_H
 #define OROS_EXT2SYSTEM_H
 
-#endif //OROS_EXT2SYSTEM_H
 #define EXT2_ROOT_INODE 2
 #include "FileSystemStructs.h"
 #include "../drivers/ATA.h"
@@ -53,3 +52,5 @@ public:
 
 
 };
+
+#endif //OROS_EXT2SYSTEM_H

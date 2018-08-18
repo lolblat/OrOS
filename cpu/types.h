@@ -4,10 +4,12 @@
 
 #ifndef OROS_TYPES_H
 #define OROS_TYPES_H
+
 typedef unsigned char u8;
 typedef unsigned short u16;
 typedef unsigned int u32;
 typedef unsigned long u64;
+typedef long unsigned int size_t;
 
 struct long_long
 {
@@ -24,4 +26,5 @@ struct BootingInfo
     u32 ptr_to_memory_map;
     u32 count_of_memory_entries;
 };
+
 #endif //OROS_TYPES_H

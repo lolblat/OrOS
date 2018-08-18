@@ -44,7 +44,20 @@ gdt_start:
 	db 10010010b
 	db 11001111b
 	db 0
-
+.gdt_user_code: equ $ - gdt_start
+ dw 0xFFFF
+ dw 0x0
+ db 0x0
+ db 11111010b
+ db 11001111b
+ db 0x0
+.gdt_user_data: equ $ - gdt_start
+ dw 0xFFFF
+ dw 0x0
+ db 0x0
+ db 11110010b
+ db 11001111b
+ db 0x0
 .end_of_gdt:
 .size:
 	dw .end_of_gdt - .gdt_data - 1

@@ -198,6 +198,7 @@ INode* EXT2System::GetFileByPath(u8 *path)
 {
 
     path++;
+    Util::printf("%s\n",path);
     Util::strsplit(path,'/');
     INode* root = ReadInode(EXT2_ROOT_INODE);
     INode* rc = (INode*)0;

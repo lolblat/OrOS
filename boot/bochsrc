@@ -1,5 +1,5 @@
 floppya: 1_44="os-image", status = inserted
-ata0-master: type=disk, path="test_for_ata_write.img", mode=flat, cylinders=101, heads=16, spt=63
+ata0-master: type=disk, path="disk", mode=flat, cylinders=101, heads=16, spt=63
 boot: floppy
 memory: guest=512, host = 256
 display_library: x, options="gui_debug"

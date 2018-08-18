@@ -17,6 +17,7 @@ extern "C"
     #include "../MemoryAllocation/MemoryManager.h"
 #include "../drivers/ATA.h"
 #include "../FileSystemEXT2/EXT2System.h"
+#include "../FileSystemEXT2/VFS.h"
     void kernel_main(BootingInfo&,u32,u32);
 }
 
@@ -29,7 +30,6 @@ void kernel_main(BootingInfo& info, u32 physical_end, u32 virtual_end)
     MemoryManager m = MemoryManager((u32*)ptr_to_free_memory, (u32*)(bestE->base_address.top + bestE->length_of_chunk.top - ptr_to_free_memory));
     CPU::ISR isr;
     __asm__("sti");
-
     drivers::Screen s;
 
     s.terminal_clear();
@@ -37,16 +37,10 @@ void kernel_main(BootingInfo& info, u32 physical_end, u32 virtual_end)
     s.terminal_write_string("Initialize kernel with 2 stage boot sector... Success!\n");
     Util::printf("End of Kernel physic: %x\n",physical_end);
     Util::printf("Setting up paging and heap... Success!\n",physical_end);
+    VFS vfs = VFS();
+    Util::printf("[D] %s\n", vfs.ReadFile((u8*)"/test.txt"));
 
     //detection of memory test
-    EXT2System system(Primary, Master);
-
-
-
-    system.WriteToFile((u8*)"/abcd.txt",(u8*)"1234",4);
-    system.ReadRootINode();
-    INode* t = system.GetFileByPath((u8*)"/abcd.txt");
-    Util::printf("%s\n",system.GetContentOfINode(t));
 
     // initialize the isr and the idt for interrupts.
 
