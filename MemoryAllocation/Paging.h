@@ -8,8 +8,8 @@
 #include "../cpu/types.h"
 #include "../Util/Util.h"
 #define PAGE_FRAME_OF_KERNEL 768
-#define PAGE_TABLE_OPTION 0x3
-#define PAGE_FRAME_OPTION 0X3
+#define PAGE_TABLE_OPTION 0x7
+#define PAGE_FRAME_OPTION 0X7
 class Paging
 {
 

@@ -18,6 +18,8 @@ extern "C"
 #include "../drivers/ATA.h"
 #include "../FileSystemEXT2/EXT2System.h"
 #include "../FileSystemEXT2/VFS.h"
+#include "../tasks/user_mode.hpp"
+#include "../cpu/gdt.h"
     void kernel_main(BootingInfo&,u32,u32);
 }
 
@@ -31,15 +33,13 @@ void kernel_main(BootingInfo& info, u32 physical_end, u32 virtual_end)
     CPU::ISR isr;
     __asm__("sti");
     drivers::Screen s;
-
     s.terminal_clear();
-
     s.terminal_write_string("Initialize kernel with 2 stage boot sector... Success!\n");
     Util::printf("End of Kernel physic: %x\n",physical_end);
     Util::printf("Setting up paging and heap... Success!\n",physical_end);
     VFS vfs = VFS();
     Util::printf("[D] %s\n", vfs.ReadFile((u8*)"/test.txt"));
-
+    GDT gdt;
     //detection of memory test
 
     // initialize the isr and the idt for interrupts.
@@ -48,6 +48,7 @@ void kernel_main(BootingInfo& info, u32 physical_end, u32 virtual_end)
     CPU::Timer timer;
     //we want freq of 50.
     timer.initialize_timer(50);
+  //  EnterUserMod();
     while(true);
 
 }

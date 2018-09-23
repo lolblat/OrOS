@@ -58,6 +58,13 @@ gdt_start:
  db 11110010b
  db 11001111b
  db 0x0
+.gdt_tss_entry: equ $ - gdt_start
+	dw 0xFFFF ;limit low 0:15
+	dw 0x0; base low 0:15
+	db 0x0 ;base 16:23
+	db 11101001b ; access
+	db 11001111b ; 4 last bits is limit 16:19
+	db 0x0; another base 24:31
 .end_of_gdt:
 .size:
 	dw .end_of_gdt - .gdt_data - 1

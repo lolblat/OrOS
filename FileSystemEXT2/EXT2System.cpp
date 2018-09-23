@@ -130,7 +130,6 @@ u8* EXT2System::GetContentOfINode(INode* inode)
     for(u32 i = 0; i < 12; i ++)
     {
         u32 fast_ptr_block = inode->direct_block_ptr[i];
-        Util::printf("%d\n",fast_ptr_block);
         if(fast_ptr_block == 0)
         {
             break;
@@ -196,9 +195,7 @@ u8* EXT2System::ReadDoubleLinked(u32 block_id_for_linked)
 
 INode* EXT2System::GetFileByPath(u8 *path)
 {
-
     path++;
-    Util::printf("%s\n",path);
     Util::strsplit(path,'/');
     INode* root = ReadInode(EXT2_ROOT_INODE);
     INode* rc = (INode*)0;
@@ -436,7 +433,6 @@ void EXT2System::AppendToDir(INode* d, u32 inode_to_append, u8* path_to_append_t
         dir.total_size_of_entry = sizeof(u32) + sizeof(u16) + sizeof(u8) + sizeof(u8) + Util::strlen(path_to_append_to) + 1;
         dir.name_length_least_bits = Util::strlen(path_to_append_to);
         dir.type_indicator = file_type;
-        Util::printf("AddNode: %d\n",dir.inode);
         Util::memcopy(path_to_append_to, dir.name_string, Util::strlen(path_to_append_to));
         if(AppendEntry((d->direct_block_ptr[i]), &dir))
         {
@@ -466,7 +462,6 @@ bool EXT2System::AppendEntry(u32 block_number_of_dir, Directory* append)
 
   while(dir->inode != 0)
   {
-    Util::printf("[?]%s\n", dir->name_string);
     u32 true_size = dir->name_length_least_bits + DIRECTORY_PADDING;
     true_size += 4 - true_size % 4; //padding
 

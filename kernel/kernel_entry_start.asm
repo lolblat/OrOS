@@ -21,7 +21,7 @@ _loader:
         jz .end
         mov eax,PAGE_SIZE
         imul eax,ecx
-        or eax,3
+        or eax,7
         lea ebx, [TableEntry_0 - KERNEL_VIRTUAL_ADDRESS_BASE + 4*ecx]
         mov [ebx], eax
         inc ecx
@@ -37,7 +37,7 @@ _loader:
         mov eax,PAGE_SIZE
         imul eax,ecx
 
-        or eax, 0x3
+        or eax, 0x7
 
         lea ebx,[TableEntry_768 - KERNEL_VIRTUAL_ADDRESS_BASE + 4 * ecx]
         mov [ebx], eax
@@ -50,11 +50,11 @@ _loader:
     mov ebx,ecx
 
     mov edx,(TableEntry_0 - KERNEL_VIRTUAL_ADDRESS_BASE )
-    or edx,0x3
+    or edx,0x7
     mov dword[ebx],edx
 
     mov edx,(TableEntry_768 - KERNEL_VIRTUAL_ADDRESS_BASE) ; the address of the table
-    or edx,0x3
+    or edx,0x7
     add ebx, KERNEL_PAGE_TABLE_ENTRY * 4 ; get the kernel pages
     mov dword[ebx], edx
     mov cr3, ecx ; base dir address
@@ -96,4 +96,3 @@ align 0x1000
 BootPageDir times 1024 dd 0x2 ;not present, read write and kernel only
 TableEntry_0 times 1024 dd 0x3; for the first mb
 TableEntry_768 times 1024 dd 0x3; for the kernel
-

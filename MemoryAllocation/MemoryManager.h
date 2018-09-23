@@ -15,7 +15,7 @@ extern "C"
     #define SIZE_OF_CHUNK_OFFSET 0
     #define NEXT_CHUNK_OFFSET 4
     #define PREV_CHUNK_OFFSET 8
-    #define KMALLOC_HEADER_LENGTH 12
+    #define KMALLOC_HEADER_LENGTH 16
     #define PAGE_SIZE 4096
     #define CHUNK_IN_USE 0x1
     #define CHUNK_NOT_IN_USE 0x0
