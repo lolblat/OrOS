@@ -32,7 +32,7 @@ extern "C"
                 u32 base; // linear address of the idt, where INT 0 is.
             }__attribute__((packed));
 
-            void set_idt_gate(int n, u32 handler);
+            void set_idt_gate(int n, u32 handler,u8 access);
 
             void set_idt();
 

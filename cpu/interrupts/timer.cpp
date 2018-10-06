@@ -16,7 +16,7 @@ static void timer_callback(interrupt_frame frame)
 
 void Timer::initialize_timer(unsigned int freq)
 {
-    register_interrupt_handler(IRQ0, timer_callback); // register the IRQ0 function handler, when interrupt from IRQ0 happens, run the timer callback
+    register_interrupt_handler(IRQ0, (u32)timer_callback,0); // register the IRQ0 function handler, when interrupt from IRQ0 happens, run the timer callback
 
     u32 divisor = PIC_TIMER_FREQ / freq; // get the freq set.
     u8 low = (u8)(divisor & 0xFF); // find low byte

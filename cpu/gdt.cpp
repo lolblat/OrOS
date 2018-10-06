@@ -54,9 +54,9 @@ GDT::GDT()
   tss_gdt_entry.base_high = (base >> 24) & 0xFF;
   Util::memset(&tss_base_entry, sizeof(tss_base_entry), '\x00');
   tss_base_entry.ss0 = 0x10;
-  tss_base_entry.esp0 = 0x00;
-  tss_base_entry.cs = 0x0b;
-  tss_base_entry.ss = tss_base_entry.ds = tss_base_entry.es = tss_base_entry.fs = tss_base_entry.gs = 0x13;
+  tss_base_entry.esp0 = 0xC008F66C; // TODO: need to set up the esp to the kernel frame esp.
+  tss_base_entry.cs = 0x1b;
+  tss_base_entry.ss = tss_base_entry.ds = tss_base_entry.es = tss_base_entry.fs = tss_base_entry.gs = 0x23;
 
   gdt_entry entries[] = {
     null_entry,

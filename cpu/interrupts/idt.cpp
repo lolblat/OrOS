@@ -8,12 +8,13 @@
 
 #include "idt.h"
 using namespace CPU;
-void IDT::set_idt_gate(int n, u32 handler)
+void IDT::set_idt_gate(int n, u32 handler, u8 access)
 {
     entries[n].offset_1 = (handler) & (0xFFFF); // high offset of the isr function.
     entries[n].selector = KERNEL_CS; // kernel code.
     entries[n].t_zeros = 0; // padding
-    entries[n].flags = 0b10001110; // Bit 1 for use int. 00 - ring 0 - for gate call protection, 0 - to use trap and int, 1110 - for 32 bit int gate
+    u8 flags_regular = (0b10001110) | (access << 5);
+    entries[n].flags = flags_regular; // Bit 1 for use int. 00 - ring 0 - for gate call protection, 0 - to use trap and int, 1110 - for 32 bit int gate
     entries[n].offset_2 = ((handler & 0xFFFF0000) >> 16); // low offset of the isr function.
 }
 

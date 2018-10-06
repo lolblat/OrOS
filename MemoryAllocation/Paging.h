@@ -7,6 +7,7 @@
 
 #include "../cpu/types.h"
 #include "../Util/Util.h"
+#include "../cpu/interrupts/isr.h"
 #define PAGE_FRAME_OF_KERNEL 768
 #define PAGE_TABLE_OPTION 0x7
 #define PAGE_FRAME_OPTION 0X7
@@ -22,4 +23,5 @@ public:
     u32 Init(u32 start,u32 end);
 
 };
+
 #endif //OROS_PAGING_H

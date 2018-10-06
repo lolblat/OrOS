@@ -20,18 +20,26 @@ extern "C"
 #include "../FileSystemEXT2/VFS.h"
 #include "../tasks/user_mode.hpp"
 #include "../cpu/gdt.h"
+#include "../tasks/system_call.h"
     void kernel_main(BootingInfo&,u32,u32);
+}
+
+
+void PageFaultHandler(interrupt_frame frame)
+{
+    Util::printf("[D] Page fault\n");
 }
 
 void kernel_main(BootingInfo& info, u32 physical_end, u32 virtual_end)
 {
+
     Paging p = Paging();
     CPU::MemoryDetector dec = CPU::MemoryDetector(info);
     CPU::MemoryEntry *bestE = dec.FindSuitableEntry();
     u32 ptr_to_free_memory = p.Init(physical_end,bestE->length_of_chunk.top + bestE->base_address.top );
     MemoryManager m = MemoryManager((u32*)ptr_to_free_memory, (u32*)(bestE->base_address.top + bestE->length_of_chunk.top - ptr_to_free_memory));
     CPU::ISR isr;
-    __asm__("sti");
+
     drivers::Screen s;
     s.terminal_clear();
     s.terminal_write_string("Initialize kernel with 2 stage boot sector... Success!\n");
@@ -41,14 +49,20 @@ void kernel_main(BootingInfo& info, u32 physical_end, u32 virtual_end)
     Util::printf("[D] %s\n", vfs.ReadFile((u8*)"/test.txt"));
     GDT gdt;
     //detection of memory test
+    register_interrupt_handler(0x0E, (u32)PageFaultHandler,3);
+    InstallSystemCallDispatch();
+
+    __asm__("sti");
 
     // initialize the isr and the idt for interrupts.
-
-
     CPU::Timer timer;
     //we want freq of 50.
     timer.initialize_timer(50);
-  //  EnterUserMod();
+
+    EnterUserMod();
+    Util::printf("[D] Welcome to user mode!\n");
+
+    asm("int $0x21");
     while(true);
 
 }

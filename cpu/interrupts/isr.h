@@ -138,62 +138,66 @@ extern "C"
             }
             static ISR* m_instance;
         public:
+          IDT idt;
+          void RegisterIDT(u32 index, u32 function, u8 access)
+          {
+            idt.set_idt_gate(index, function, access);
+          }
             ISR() {
                 m_instance = this;
-                IDT idt;
                 //create gates for all those functions.
                 SetPIC();
                 // set idt gates
-                idt.set_idt_gate(0, (u32) isr0);
-                idt.set_idt_gate(1, (u32) isr1);
-                idt.set_idt_gate(2, (u32) isr2);
-                idt.set_idt_gate(3, (u32) isr3);
-                idt.set_idt_gate(4, (u32) isr4);
-                idt.set_idt_gate(5, (u32) isr5);
-                idt.set_idt_gate(6, (u32) isr6);
-                idt.set_idt_gate(7, (u32) isr7);
-                idt.set_idt_gate(8, (u32) isr8);
-                idt.set_idt_gate(9, (u32) isr9);
-                idt.set_idt_gate(10, (u32) isr10);
-                idt.set_idt_gate(11, (u32) isr11);
-                idt.set_idt_gate(12, (u32) isr12);
-                idt.set_idt_gate(13, (u32) isr13);
-                idt.set_idt_gate(14, (u32) isr14);
-                idt.set_idt_gate(15, (u32) isr15);
-                idt.set_idt_gate(16, (u32) isr16);
-                idt.set_idt_gate(17, (u32) isr17);
-                idt.set_idt_gate(18, (u32) isr18);
-                idt.set_idt_gate(19, (u32) isr19);
-                idt.set_idt_gate(20, (u32) isr20);
-                idt.set_idt_gate(21, (u32) isr21);
-                idt.set_idt_gate(22, (u32) isr22);
-                idt.set_idt_gate(23, (u32) isr23);
-                idt.set_idt_gate(24, (u32) isr24);
-                idt.set_idt_gate(25, (u32) isr25);
-                idt.set_idt_gate(26, (u32) isr26);
-                idt.set_idt_gate(27, (u32) isr27);
-                idt.set_idt_gate(28, (u32) isr28);
-                idt.set_idt_gate(29, (u32) isr29);
-                idt.set_idt_gate(30, (u32) isr30);
-                idt.set_idt_gate(31, (u32) isr31);
+                RegisterIDT(0, (u32) isr0,0);
+                RegisterIDT(1, (u32) isr1,0);
+                RegisterIDT(2, (u32) isr2,0);
+                RegisterIDT(3, (u32) isr3,3);
+                RegisterIDT(4, (u32) isr4,0);
+                RegisterIDT(5, (u32) isr5,0);
+                RegisterIDT(6, (u32) isr6,0);
+                RegisterIDT(7, (u32) isr7,0);
+                RegisterIDT(8, (u32) isr8,0);
+                RegisterIDT(9, (u32) isr9,0);
+                RegisterIDT(10, (u32) isr10,0);
+                RegisterIDT(11, (u32) isr11,0);
+                RegisterIDT(12, (u32) isr12,0);
+                RegisterIDT(13, (u32) isr13,3);
+                RegisterIDT(14, (u32) 0,3);
+                RegisterIDT(15, (u32) isr15,0);
+                RegisterIDT(16, (u32) isr16,0);
+                RegisterIDT(17, (u32) isr17,0);
+                RegisterIDT(18, (u32) isr18,0);
+                RegisterIDT(19, (u32) isr19,0);
+                RegisterIDT(20, (u32) isr20,0);
+                RegisterIDT(21, (u32) isr21,0);
+                RegisterIDT(22, (u32) isr22,0);
+                RegisterIDT(23, (u32) isr23,0);
+                RegisterIDT(24, (u32) isr24,0);
+                RegisterIDT(25, (u32) isr25,0);
+                RegisterIDT(26, (u32) isr26,0);
+                RegisterIDT(27, (u32) isr27,0);
+                RegisterIDT(28, (u32) isr28,0);
+                RegisterIDT(29, (u32) isr29,0);
+                RegisterIDT(30, (u32) isr30,0);
+                RegisterIDT(31, (u32) isr31,0);
 
                 //set irq
-                idt.set_idt_gate(IRQ0,(u32)irq0);
-                idt.set_idt_gate(IRQ1,(u32)irq1);
-                idt.set_idt_gate(IRQ2,(u32)irq2);
-                idt.set_idt_gate(IRQ3,(u32)irq3);
-                idt.set_idt_gate(IRQ4,(u32)irq4);
-                idt.set_idt_gate(IRQ5,(u32)irq5);
-                idt.set_idt_gate(IRQ6,(u32)irq6);
-                idt.set_idt_gate(IRQ7,(u32)irq7);
-                idt.set_idt_gate(IRQ8,(u32)irq8);
-                idt.set_idt_gate(IRQ9,(u32)irq9);
-                idt.set_idt_gate(IRQ10,(u32)irq10);
-                idt.set_idt_gate(IRQ11,(u32)irq11);
-                idt.set_idt_gate(IRQ12,(u32)irq12);
-                idt.set_idt_gate(IRQ13,(u32)irq13);
-                idt.set_idt_gate(IRQ14,(u32)irq14);
-                idt.set_idt_gate(IRQ15,(u32)irq15);
+                RegisterIDT(IRQ0,(u32)irq0,3);
+                RegisterIDT(IRQ1,(u32)irq1,3);
+                RegisterIDT(IRQ2,(u32)irq2,3);
+                RegisterIDT(IRQ3,(u32)irq3,3);
+                RegisterIDT(IRQ4,(u32)irq4,0);
+                RegisterIDT(IRQ5,(u32)irq5,0);
+                RegisterIDT(IRQ6,(u32)irq6,0);
+                RegisterIDT(IRQ7,(u32)irq7,0);
+                RegisterIDT(IRQ8,(u32)irq8,0);
+                RegisterIDT(IRQ9,(u32)irq9,0);
+                RegisterIDT(IRQ10,(u32)irq10,0);
+                RegisterIDT(IRQ11,(u32)irq11,0);
+                idt.set_idt_gate(IRQ12,(u32)irq12,0);
+                idt.set_idt_gate(IRQ13,(u32)irq13,0);
+                idt.set_idt_gate(IRQ14,(u32)irq14,3);
+                idt.set_idt_gate(IRQ15,(u32)irq15,0);
 
                 //finally set the idt in the cpu.
                 idt.set_idt();
@@ -215,6 +219,6 @@ extern "C"
     typedef void (*isr_t)(interrupt_frame);
 
 
-    void register_interrupt_handler(u8, isr_t);
+    void register_interrupt_handler(u8, u32, u8);
 }
 #endif //OROS_ISR_H
